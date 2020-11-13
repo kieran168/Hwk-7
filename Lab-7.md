@@ -1,11 +1,6 @@
 Lab 7
 ================
-
-## Econ B2000, MA Econometrics
-
-## Kevin R Foster, the Colin Powell School at the City College of New York, CUNY
-
-## Fall 2020
+Marjan Rezvani, Patrick Sinclair, Kieran Yuen
 
 For this lab, we will shake things up – a different dataset\! We’ll
 estimate a variety of models to try to predict if a person has health
@@ -286,100 +281,6 @@ These give a table about how the models predict.
 ### Random Forest
 
 Here is code for a Random Forest, which takes a bit of computing,
-
-    ## Loading required package: randomForest
-
-    ## Warning: package 'randomForest' was built under R version 4.0.3
-
-    ## randomForest 4.6-14
-
-    ## Type rfNews() to see new features/changes/bug fixes.
-
-    ## 
-    ## Call:
-    ##  randomForest(formula = as.factor(NOTCOV) ~ ., data = sobj$data,      importance = TRUE, proximity = TRUE, ntree = 100, mtry = 5) 
-    ##                Type of random forest: classification
-    ##                      Number of trees: 100
-    ## No. of variables tried at each split: 5
-    ## 
-    ##         OOB estimate of  error rate: 13.72%
-    ## Confusion matrix:
-    ##       0   1 class.error
-    ## 0 11045 174   0.0155094
-    ## 1  1634 326   0.8336735
-
-    ##                           0     1 MeanDecreaseAccuracy MeanDecreaseGini
-    ## Age                   18.59 16.05                26.36           291.32
-    ## female                 3.84  3.52                 4.72            30.31
-    ## AfAm                  -0.12  8.59                 6.12            22.61
-    ## Asian                  2.28  0.94                 3.00            12.29
-    ## RaceOther              3.00  3.34                 4.23            17.05
-    ## Hispanic              -5.04 12.99                16.80            98.85
-    ## educ_hs                7.75 -3.01                 6.38            28.46
-    ## educ_smcoll            8.09  5.95                12.44            21.61
-    ## educ_as                6.51  5.99                 9.00            18.54
-    ## educ_bach             10.21 10.72                13.92            34.13
-    ## educ_adv              12.08 14.01                18.38            33.89
-    ## married               13.37 -5.41                12.77            45.20
-    ## widowed                4.02 -0.58                 3.86             8.28
-    ## divorc_sep             2.64 -0.50                 2.43            16.57
-    ## Region.Midwest        -1.74  3.94                 1.11            17.36
-    ## Region.South           2.30  7.32                 8.13            30.14
-    ## Region.West            0.15  3.73                 3.93            22.31
-    ## born.Mex.CentAm.Carib -1.41 22.19                20.45           171.12
-    ## born.S.Am              2.10  3.90                 4.18            10.86
-    ## born.Eur              -1.04  0.17                -0.93             5.19
-    ## born.f.USSR           -1.80 -2.29                -2.34             2.16
-    ## born.Africa           -1.79  3.02                -0.67             7.35
-    ## born.MidE             -0.01 -1.01                -0.16             2.10
-    ## born.India.subc        5.29  1.67                 5.81             7.05
-    ## born.Asia             -0.09  0.79                 0.22             7.74
-    ## born.SE.Asia           4.46 -0.11                 4.59             7.54
-    ## born.elsewhere        -1.78  0.50                -1.39             5.93
-    ## born.unknown           0.22 -1.76                -0.12             1.93
-
-![](Lab-7_files/figure-gfm/Random%20Forest-1.png)<!-- -->
-
-    ##     true
-    ## pred     0     1
-    ##    0 55193  8631
-    ##    1   931  1638
-
-    ##     true
-    ## pred          0          1
-    ##    0 0.83130752 0.12999864
-    ##    1 0.01402256 0.02467128
-
-    ## [1] 0.8559788
-
-    ## [1] 0.01402256
-
-    ## [1] 0.1299986
-
-    ## [1] 85.6
-
-    ## mtry = 5  OOB error = 13.71% 
-    ## Searching left ...
-    ## mtry = 3     OOB error = 14.14% 
-    ## -0.031544 0.5 
-    ## Searching right ...
-    ## mtry = 10    OOB error = 14.16% 
-    ## -0.0326508 0.5
-
-![](Lab-7_files/figure-gfm/Optimal%20Variable%20Code%20for%20Random%20Forest-1.png)<!-- -->
-
-    ##        mtry  OOBError
-    ## 3.OOB     3 0.1414371
-    ## 5.OOB     5 0.1371121
-    ## 10.OOB   10 0.1415889
-
-    ##        mtry  OOBError
-    ## 3.OOB     3 0.1414371
-    ## 5.OOB     5 0.1371121
-    ## 10.OOB   10 0.1415889
-
-    ##      mtry  OOBError 
-    ## 5.0000000 0.1371121
 
 Note that the estimation prints out a Confusion Matrix first but that’s
 within the training data; the later one calculates how well it does on
