@@ -12,7 +12,12 @@ output: github_document
 
 For this lab, we will shake things up -- a different dataset! We'll estimate a variety of models to try to predict if a person has health insurance. Start with logit like last week then some different models: Random Forest, Support Vector Machines, and Elastic Net (which is not optimal for a 0/1 dependent but it works for a demonstration).
 
-Download the NHIS data and load it into R. If you do a summary of the data, you will see that it includes a variety of people of all ages. We want to understand what factors make an adult more likely to have health insurance. Some of the variable names are a bit mystifying: disabl_limit codes 0/1 if the person has any limitations from a disability; RRP codes relationship to the person answering the question; HHX, FMX, and FPX just are ID numbers; SCHIP is a children's healthcare system; sptn_medical is a factor telling how much the person spent on medical bills. This is only a tiny fraction of the information in that survey; there are more than 1000 different variables.
+Download the NHIS data and load it into R. If you do a summary of the data, you will see that it includes a variety of people of all ages.
+
+```{r}
+summary(data_use1)
+```
+We want to understand what factors make an adult more likely to have health insurance. Some of the variable names are a bit mystifying: disabl_limit codes 0/1 if the person has any limitations from a disability; RRP codes relationship to the person answering the question; HHX, FMX, and FPX just are ID numbers; SCHIP is a children's healthcare system; sptn_medical is a factor telling how much the person spent on medical bills. This is only a tiny fraction of the information in that survey; there are more than 1000 different variables.
 
 The person's earnings could use a bit of recoding,
 ```{r}
@@ -20,10 +25,15 @@ data_use1$earn_lastyr <- as.factor(data_use1$ERNYR_P)
 levels(data_use1$earn_lastyr) <- c("0","$01-$4999","$5000-$9999","$10000-$14999","$15000-$19999","$20000-$24999","$25000-$34999","$35000-$44999","$45000-$54999","$55000-$64999","$65000-$74999","$75000 and over",NA,NA,NA)
 ```
 ```{r}
-dat2 <- subset(data_use1, ((AGE_P >= 27) & (AGE_P <= 75)))
-covprop <- dat2$NOTCOV
-table(covprop)
-prop.table(table(covprop))
+dat2 <- subset(data_use1, ((AGE_P >= 17) & (AGE_P <= 75)))
+covprop <- dat2$NOTCOV 
+covtable <- table(covprop)
+agecovtable <- table(dat2$AGE_P, dat2$NOTCOV)
+colnames(agecovtable) <- c("Covered", "Not Covered")
+addmargins(agecovtable)
+names(covtable) <- c("Covered", "Not Covered")
+addmargins(covtable)
+prop.table(covtable)
 ```
 
 First decide on how you're defining your subgroup (all adults? Within certain age? Other?) then find some basic statistics -- what fraction are not covered? (Later go back to look at simple stats for subgroups to see if there are sharp differences.)
@@ -40,7 +50,10 @@ summary(model_logit1)
 ```
 
 
-First you should think about what subset of data that you'll use. So change "data_use1".
+First you should think about what subset of data that you'll use. So change "data_use1". 
+```{r} 
+#using dat2
+```
 
 Some of the estimation procedures are not as tolerant about factors so we need to set those as dummies. Some are also intolerant of NA values. I'll show the code for the basic set of explanatory variables, which you can modify as you see fit.
 
