@@ -1,6 +1,9 @@
 #### Which model is predicting the best?
 For the subset of 27-75 year olds, Random Forest and Support Vector Machines were the most successful at predicting ~85% correct. The Elastic Net had the lowest correct prediction rate of ~59% but this was to be expected as this ML method is not made for 0/1 variable, it is made for continuous data, not discrete.
 #### What is the trade-off between false positives vs false negatives?
+```{r}
+# Policy perspective
+# Insurance Industry perspective/employer perspective
 True Positive: People WITH Health Insurance, predicted to HAVE health insurance
 False Positive: People WITHOUT Health Insurance, predicted to HAVE health insurance
 True Negative: People WITHOUT Health Insurance, predicted to NOT HAVE health insurance
