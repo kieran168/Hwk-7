@@ -9,22 +9,26 @@ output: github_document
 ## Kevin R Foster, the Colin Powell School at the City College of New York, CUNY
 ## Fall 2020
 
+```{r Load NHIS, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+load("NHIS_2014.RData")
+```
 
 For this lab, we will shake things up -- a different dataset! We'll estimate a variety of models to try to predict if a person has health insurance. Start with logit like last week then some different models: Random Forest, Support Vector Machines, and Elastic Net (which is not optimal for a 0/1 dependent but it works for a demonstration).
 
 Download the NHIS data and load it into R. If you do a summary of the data, you will see that it includes a variety of people of all ages.
 
-```{r}
-summary(data_use1)
+```{r Summary Data Use1}
+# summary(data_use1)
 ```
 We want to understand what factors make an adult more likely to have health insurance. Some of the variable names are a bit mystifying: disabl_limit codes 0/1 if the person has any limitations from a disability; RRP codes relationship to the person answering the question; HHX, FMX, and FPX just are ID numbers; SCHIP is a children's healthcare system; sptn_medical is a factor telling how much the person spent on medical bills. This is only a tiny fraction of the information in that survey; there are more than 1000 different variables.
 
 The person's earnings could use a bit of recoding,
-```{r}
+```{r Recode Earn_LastYr}
 data_use1$earn_lastyr <- as.factor(data_use1$ERNYR_P)
 levels(data_use1$earn_lastyr) <- c("0","$01-$4999","$5000-$9999","$10000-$14999","$15000-$19999","$20000-$24999","$25000-$34999","$35000-$44999","$45000-$54999","$55000-$64999","$65000-$74999","$75000 and over",NA,NA,NA)
 ```
-```{r}
+```{r Create Dat2 Props}
 dat2 <- subset(data_use1, ((AGE_P >= 17) & (AGE_P <= 75)))
 covprop <- dat2$NOTCOV 
 covtable <- table(covprop)
@@ -40,7 +44,7 @@ First decide on how you're defining your subgroup (all adults? Within certain ag
 
 Run a logit regression. An example is below. 
 
-```{r}
+```{r 1st Logit}
 # dat2
 model_logit1 <- glm(NOTCOV ~ AGE_P + I(AGE_P^2) + female + AfAm + Asian + RaceOther  
                     + Hispanic + educ_hs + educ_smcoll + educ_as + educ_bach + educ_adv 
@@ -51,13 +55,13 @@ summary(model_logit1)
 
 
 First you should think about what subset of data that you'll use. So change "data_use1". 
-```{r} 
+```{r Note 1} 
 #using dat2
 ```
 
 Some of the estimation procedures are not as tolerant about factors so we need to set those as dummies. Some are also intolerant of NA values. I'll show the code for the basic set of explanatory variables, which you can modify as you see fit.
 
-```{r}
+```{r Factor Recode for data.frame}
 d_region <- data.frame(model.matrix(~ dat2$REGION))
 d_region_born <- data.frame(model.matrix(~ factor(dat2$region_born)))  # snips any with zero in the subgroup
 dat_for_analysis_sub <- data.frame(
@@ -111,7 +115,7 @@ summary(dat_for_analysis_sub)
 ```
 Next create a common data object that is standardized (check what it does! run summary(sobj$data) ) and split into training and test sets. I have to use a very small training set to prevent my little laptop from running out of memory. You can try a bigger value like max=0.75 or similar. Summary(restrict_1) will tell you how many are in the training set vs test.
 
-```{r}
+```{r Standardize for Sobj}
 require("standardize")
 set.seed(654321)
 NN <- length(dat_for_analysis_sub$NOTCOV)
@@ -133,7 +137,7 @@ dat_test
 ```
 Then start with some models. I'll give code for the Linear Probability Model (ie good ol' OLS) and logit, to show how to call those with the standarized object.
 
-```{r eval = FALSE}
+```{r Linear Prob Model and Logit, eval = FALSE}
 # LPM
 model_lpm1 <- lm(sobj$formula, data = sobj$data)
 summary(model_lpm1)
@@ -150,7 +154,7 @@ table(pred = pred_model_logit1, true = dat_test$NOTCOV)
 You can play around to see if the "predvals > 0.5" cutoff is best. These give a table about how the models predict.
 
 Here is code for a Random Forest, which takes a bit of computing,
-```{r eval = FALSE}
+```{r Random Forest, eval = FALSE}
 # install.packages("randomForest")
 require('randomForest')
 set.seed(54321)
@@ -165,7 +169,7 @@ table(pred = pred_model1, true = dat_test$NOTCOV)
 Note that the estimation prints out a Confusion Matrix first but that's within the training data; the later one calculates how well it does on the test data.
 
 Next is Support Vector Machines. First it tries to find optimal tuning parameter, next uses those optimal values to train. (Tuning takes a long time so skip for now!)
-```{r eval = FALSE}
+```{r Support Vector Machines, eval = FALSE}
 # install.packages("e1071")
 require(e1071)
 # tuned_parameters <- tune.svm(as.factor(NOTCOV) ~ ., data = sobj$data, gamma = 10^(-3:0), cost = 10^(-2:1)) 
@@ -177,7 +181,7 @@ table(pred = svm.pred, true = dat_test$NOTCOV)
 ```
 
 Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
-```{r eval = FALSE}
+```{r Elastic Net, eval = FALSE}
 # Elastic Net
 # install.packages("glmnet")
 require(glmnet)
