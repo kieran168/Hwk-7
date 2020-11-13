@@ -123,6 +123,7 @@ NN
 restrict_1 <- as.logical(runif(NN) < 0.167) # use fraction as training data
 summary(restrict_1)
 dat_train <- subset(dat_for_analysis_sub, restrict_1)
+# dat_train
 dat_test <- subset(dat_for_analysis_sub, !restrict_1)
 sobj <- standardize(NOTCOV ~ Age + female + AfAm + Asian + RaceOther + Hispanic + 
                       educ_hs + educ_smcoll + educ_as + educ_bach + educ_adv + 
@@ -133,10 +134,10 @@ sobj <- standardize(NOTCOV ~ Age + female + AfAm + Asian + RaceOther + Hispanic 
                       born.SE.Asia + born.elsewhere + born.unknown, dat_train, family = binomial)
 s_dat_test <- predict(sobj, dat_test)
 summary(sobj$data)
-dat_test
+# dat_test
 ```
 Then start with some models. I'll give code for the Linear Probability Model (ie good ol' OLS) and logit, to show how to call those with the standarized object.
-
+### LPM and OLS
 ```{r Linear Prob Model and Logit, eval = FALSE}
 # LPM
 model_lpm1 <- lm(sobj$formula, data = sobj$data)
@@ -153,21 +154,43 @@ table(pred = pred_model_logit1, true = dat_test$NOTCOV)
 ```
 You can play around to see if the "predvals > 0.5" cutoff is best. These give a table about how the models predict.
 
+### Random Forest
 Here is code for a Random Forest, which takes a bit of computing,
-```{r Random Forest, eval = FALSE}
+```{r Random Forest}
 # install.packages("randomForest")
 require('randomForest')
 set.seed(54321)
-model_randFor <- randomForest(as.factor(NOTCOV) ~ ., data = sobj$data, importance=TRUE, proximity=TRUE)
+model_randFor <- randomForest(as.factor(NOTCOV) ~ ., data = sobj$data, importance=TRUE, proximity=TRUE, ntree=100, mtry=5)
 print(model_randFor)
 round(importance(model_randFor),2)
 varImpPlot(model_randFor)
 # look at confusion matrix for this too
 pred_model1 <- predict(model_randFor,  s_dat_test)
-table(pred = pred_model1, true = dat_test$NOTCOV)
+predtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
+predtable
+```
+```{r Proportions of Correct Prediction}
+proppred <- prop.table(predtable)
+proppred
+goodpred <- sum((proppred[1,1])+(proppred[2,2]))
+goodpred
+falsepos <- proppred[2,1]
+falseneg <- proppred[1,2]
+falsepos
+falseneg
+round(goodpred*100, digits = 2)
+```
+
+```{r Optimal Variable Code for Random Forest}
+mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 2, improve = 0.5, trace = TRUE, plot = TRUE)
+mtry
+best.m <- mtry[mtry[, 2] == min(mtry[, 2]), (1:2)]
+print(mtry)
+print(best.m)
 ```
 Note that the estimation prints out a Confusion Matrix first but that's within the training data; the later one calculates how well it does on the test data.
 
+### Support Vector Machines
 Next is Support Vector Machines. First it tries to find optimal tuning parameter, next uses those optimal values to train. (Tuning takes a long time so skip for now!)
 ```{r Support Vector Machines, eval = FALSE}
 # install.packages("e1071")
@@ -180,6 +203,7 @@ svm.pred <- predict(svm.model, s_dat_test)
 table(pred = svm.pred, true = dat_test$NOTCOV)
 ```
 
+### Elastic Net
 Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
 ```{r Elastic Net, eval = FALSE}
 # Elastic Net
