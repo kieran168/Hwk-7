@@ -12,18 +12,45 @@ to 26 and those in their late 20s and early 30s, who are [no longer
 eligible](https://www.healthcare.gov/young-adults/children-under-26/) to
 be claimed on their parents’ plans.
 
-    ##     Covered Not Covered         Sum 
-    ##       67343       12229       79572
+Below we have subtotals and proportions for the respondents in the data
+set between the ages of 17 and 75 who have and do not have health
+insurance coverage.
 
-    ##     Covered Not Covered 
-    ##   0.8463153   0.1536847
+<table class="kable_wrapper">
 
-First decide on how you’re defining your subgroup (all adults? Within
-certain age? Other?) then find some basic statistics – what fraction are
-not covered? (Later go back to look at simple stats for subgroups to see
-if there are sharp differences.)
+<tbody>
 
-Run a logit regression. An example is below.
+<tr>
+
+<td>
+
+| Coverage    | Total |
+| :---------- | :---- |
+| Covered     | 67343 |
+| Not Covered | 12229 |
+| Sum         | 79572 |
+
+</td>
+
+<td>
+
+| Coverage    | Proportion |
+| :---------- | ---------: |
+| Covered     |  0.8463153 |
+| Not Covered |  0.1536847 |
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+Approximately 85% of respondents have health insurance coverage.
+
+Here are the logit regression results from the amended subset - Age
+\(\ge 17\), \(\le 75\).
 
     ## 
     ## Call:
@@ -81,8 +108,30 @@ Run a logit regression. An example is below.
     ## 
     ## Number of Fisher Scoring iterations: 6
 
-First you should think about what subset of data that you’ll use. So
-change “data\_use1”.
+Given that the dependent variable NOTCOV is coded 0 and 1. [(p. 202,
+Person Variable Layout Document) N.B. This link immediately initiates a
+PDF
+download](ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf).
+The value 1 meaning that the condition of no coverage *is* present, we
+can interpret from the logit regression that coefficients with a
+positive value are predictors of **NOT** having health insurance.
+
+As we implement the other machine learning prediction models and
+interpret their results, we can keep the results of this logit
+regression in mind, as a guide for what the models are putting emphasis
+on and how they are treating the variables differently from model to
+model. For example, when we look at the results from the Support vector
+Machine, we know that in an SVM, the loss function for observations that
+fall on the correct side of the margins of the separating plane have no
+bearing on the position or slope of the separating plane. In a logit
+regression, the loss function is never exactly equal to zero, so
+observations that fall well within in each classification zone will
+still impact the position and slope of the separating plane as those
+observations change, even if the impact is very small. If the dependent
+classes are well separated, the logit regression is more susceptible to
+the impact of outlying determining variables than Support Vector
+Machines [(James, Witten, Hastie and Tibshirani,
+p. 357)](https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf).
 
 Some of the estimation procedures are not as tolerant about factors so
 we need to set those as dummies. Some are also intolerant of NA values.
@@ -231,4 +280,11 @@ and if there are certain explanatory variables that are consistently
 more or less useful. Also try other lists of explanatory variables.
 
 \#\#\#Bibliography
+<ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf>
+
 <https://www.healthcare.gov/young-adults/children-under-26/>
+
+James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani,
+(2017). Introduction to Statistical Learning. New York: Springer
+Science+Business Media,
+<https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf>

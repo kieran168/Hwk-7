@@ -7,6 +7,7 @@ output: github_document
 
 ```{r Load NHIS, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(knitr)
 load("NHIS_2014.RData")
 ```
 
@@ -16,6 +17,8 @@ levels(data_use1$earn_lastyr) <- c("0","$01-$4999","$5000-$9999","$10000-$14999"
 ```
 ### Predicting Health Insurance Coverage
 Using the provided data from the National Health Interview Survey 2014, we took a subset of respondents between the ages of 17 and 75. We chose this particular range with a view to further possible subgroups, such as examining the changes in insurance coverage from those of college age up to 26 and those in their late 20s and early 30s, who are [no longer eligible](https://www.healthcare.gov/young-adults/children-under-26/) to be claimed on their parents' plans.
+
+Below we have subtotals and proportions for the respondents in the data set between the ages of 17 and 75 who have and do not have health insurance coverage. 
 ```{r Create Dat2 Props}
 dat2 <- subset(data_use1, ((AGE_P >= 17) & (AGE_P <= 75)))
 covprop <- dat2$NOTCOV 
@@ -24,16 +27,21 @@ agecovtable <- table(dat2$AGE_P, dat2$NOTCOV)
 colnames(agecovtable) <- c("Covered", "Not Covered")
 agetable <- addmargins(agecovtable)
 names(covtable) <- c("Covered", "Not Covered")
-addmargins(covtable)
-prop.table(covtable)
+t1 <- addmargins(covtable)
+t2 <- prop.table(covtable)
+kables(list(kable(t1, align = "l", col.names = c("Coverage", "Total")), kable(t2, col.names = c("Coverage", "Proportion"))))
 ```
 
-First decide on how you're defining your subgroup (all adults? Within certain age? Other?) then find some basic statistics -- what fraction are not covered? (Later go back to look at simple stats for subgroups to see if there are sharp differences.)
+Approximately `r round((prop.table(covtable)[1])*100, digits = 0)`% of respondents have health insurance coverage. 
 
-Run a logit regression. An example is below. 
+```{r Question 2 Subgroups and Logit, eval=FALSE, include=FALSE}
+#First decide on how you're defining your subgroup (all adults? Within certain age? Other?) then find some basic statistics -- what fraction are not covered? (Later go back to look at simple stats for subgroups to see if there are sharp differences.)
 
+#Run a logit regression. An example is below. 
+```
+
+Here are the logit regression results from the amended subset - Age $\ge 17$, $\le 75$.
 ```{r 1st Logit}
-# dat2
 model_logit1 <- glm(NOTCOV ~ AGE_P + I(AGE_P^2) + female + AfAm + Asian + RaceOther  
                     + Hispanic + educ_hs + educ_smcoll + educ_as + educ_bach + educ_adv 
                     + married + widowed + divorc_sep + veteran_stat + REGION + region_born,
@@ -41,11 +49,9 @@ model_logit1 <- glm(NOTCOV ~ AGE_P + I(AGE_P^2) + female + AfAm + Asian + RaceOt
 summary(model_logit1)
 ```
 
+Given that the dependent variable NOTCOV is coded 0 and 1. [(p. 202, Person Variable Layout Document) N.B. This link immediately initiates a PDF download](ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf). The value 1 meaning that the condition of no coverage *is* present, we can interpret from the logit regression that coefficients with a positive value are predictors of **NOT** having health insurance.
 
-First you should think about what subset of data that you'll use. So change "data_use1". 
-```{r Note 1} 
-#using dat2
-```
+As we implement the other machine learning prediction models and interpret their results, we can keep the results of this logit regression in mind, as a guide for what the models are putting emphasis on and how they are treating the variables differently from model to model. For example, when we look at the results from the Support vector Machine, we know that in an SVM, the loss function for observations that fall on the correct side of the margins of the separating plane have no bearing on the position or slope of the separating plane. In a logit regression, the loss function is never exactly equal to zero, so observations that fall well within in each classification zone will still impact the position and slope of the separating plane as those observations change, even if the impact is very small. If the dependent classes are well separated, the logit regression is more susceptible to the impact of outlying determining variables than Support Vector Machines [(James, Witten, Hastie and Tibshirani, p. 357)](https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf).
 
 Some of the estimation procedures are not as tolerant about factors so we need to set those as dummies. Some are also intolerant of NA values. I'll show the code for the basic set of explanatory variables, which you can modify as you see fit.
 
@@ -196,8 +202,10 @@ Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 
 ```{r Elastic Net, eval = FALSE}
 # Elastic Net
 # install.packages("glmnet")
+# install.packages("vip")
+require(vip)
 require(glmnet)
-model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0) 
+model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0)
 # default is alpha = 1, lasso
 par(mar=c(4.5,4.5,1,4))
 plot(model1_elasticnet)
@@ -207,6 +215,9 @@ axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=
 plot(model1_elasticnet, xvar = "lambda")
 plot(model1_elasticnet, xvar = "dev", label = TRUE)
 print(model1_elasticnet)
+vip(model1_elasticnet, num_features = 50, geom = "point")
+vip(cvmodel1_elasticnet, num_features = 50, geom = "point")
+#https://bradleyboehmke.github.io/HOML/regularized-regression.html
 cvmodel1_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
 cvmodel1_elasticnet$lambda.min
 log(cvmodel1_elasticnet$lambda.min)
@@ -235,10 +246,16 @@ coef(cvmodel2_elasticnet, s = "lambda.min")
 pred2_elasnet <- predict(model2_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel2_elasticnet$lambda.min)
 pred_model2_elasnet <- (pred2_elasnet < mean(pred2_elasnet)) 
 table(pred = pred_model2_elasnet, true = dat_test$NOTCOV)
-```
 
+# Try different alpha values to see if you can improve
+```
 When you summarize, you should be able to explain which models predict best (noting if there is a tradeoff of false positive vs false negative) and if there are certain explanatory variables that are consistently more or less useful. Also try other lists of explanatory variables.
 
 
 ###Bibliography
+ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf
+
 https://www.healthcare.gov/young-adults/children-under-26/
+
+James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani, (2017). Introduction to Statistical Learning. New York: Springer Science+Business Media, https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf 
+
