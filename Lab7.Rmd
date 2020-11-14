@@ -53,8 +53,6 @@ Given that the dependent variable NOTCOV is coded 0 and 1. [(p. 202, Person Vari
 
 As we implement the other machine learning prediction models and interpret their results, we can keep the results of this logit regression in mind, as a guide for what the models are putting emphasis on and how they are treating the variables differently from model to model. For example, when we look at the results from the Support vector Machine, we know that in an SVM, the loss function for observations that fall on the correct side of the margins of the separating plane have no bearing on the position or slope of the separating plane. In a logit regression, the loss function is never exactly equal to zero, so observations that fall well within in each classification zone will still impact the position and slope of the separating plane as those observations change, even if the impact is very small. If the dependent classes are well separated, the logit regression is more susceptible to the impact of outlying determining variables than Support Vector Machines [(James, Witten, Hastie and Tibshirani, p. 357)](https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf).
 
-Some of the estimation procedures are not as tolerant about factors so we need to set those as dummies. Some are also intolerant of NA values. I'll show the code for the basic set of explanatory variables, which you can modify as you see fit.
-
 ```{r Factor Recode for data.frame}
 d_region <- data.frame(model.matrix(~ dat2$REGION))
 d_region_born <- data.frame(model.matrix(~ factor(dat2$region_born)))  # snips any with zero in the subgroup
@@ -105,19 +103,16 @@ names(dat_for_analysis_sub) <- c("NOTCOV",
                                  "born.SE.Asia",
                                  "born.elsewhere",
                                  "born.unknown")
-summary(dat_for_analysis_sub)
 ```
-Next create a common data object that is standardized (check what it does! run summary(sobj$data) ) and split into training and test sets. I have to use a very small training set to prevent my little laptop from running out of memory. You can try a bigger value like max=0.75 or similar. Summary(restrict_1) will tell you how many are in the training set vs test.
-
-```{r Standardize for Sobj}
+We've utilized the provided data.frame and standarizing code to standardize the variables and create our training and test sets. The training set is comprised of 75% of the observations.    
+```{r Standardize for Sobj, include=FALSE}
 require("standardize")
 set.seed(654321)
 NN <- length(dat_for_analysis_sub$NOTCOV)
 NN
-restrict_1 <- as.logical(runif(NN) < 0.167) # use fraction as training data
-summary(restrict_1)
+restrict_1 <- as.logical(runif(NN) < 0.75) # use fraction as training data
+# summary(restrict_1)
 dat_train <- subset(dat_for_analysis_sub, restrict_1)
-# dat_train
 dat_test <- subset(dat_for_analysis_sub, !restrict_1)
 sobj <- standardize(NOTCOV ~ Age + female + AfAm + Asian + RaceOther + Hispanic + 
                       educ_hs + educ_smcoll + educ_as + educ_bach + educ_adv + 
@@ -127,26 +122,36 @@ sobj <- standardize(NOTCOV ~ Age + female + AfAm + Asian + RaceOther + Hispanic 
                       born.Africa + born.MidE + born.India.subc + born.Asia + 
                       born.SE.Asia + born.elsewhere + born.unknown, dat_train, family = binomial)
 s_dat_test <- predict(sobj, dat_test)
-summary(sobj$data)
-# dat_test
+# summary(sobj$data)
 ```
-Then start with some models. I'll give code for the Linear Probability Model (ie good ol' OLS) and logit, to show how to call those with the standarized object.
-### LPM and OLS
-```{r Linear Prob Model and Logit, eval = FALSE}
-# LPM
-model_lpm1 <- lm(sobj$formula, data = sobj$data)
-summary(model_lpm1)
-pred_vals_lpm <- predict(model_lpm1, s_dat_test)
-pred_model_lpm1 <- (pred_vals_lpm > 0.5)
-table(pred = pred_model_lpm1, true = dat_test$NOTCOV)
-# logit 
+#### OLS
+```{r Linear Prob Model}
+model_OLS1 <- lm(sobj$formula, data = sobj$data)
+summary(model_OLS1)
+pred_vals_OLS <- suppressWarnings(predict(model_OLS1, s_dat_test))
+pred_model_OLS1 <- (pred_vals_OLS > 0.45)
+pred1OLStable <- table(pred = pred_model_OLS1, true = dat_test$NOTCOV)
+pred1OLStable
+goodolspred <- sum((prop.table(pred1OLStable)[1,1])+(prop.table(pred1OLStable)[2,2]))
+```
+#### Logit
+```{r Logit}
 model_logit1 <- glm(sobj$formula, family = binomial, data = sobj$data)
 summary(model_logit1)
-pred_vals <- predict(model_logit1, s_dat_test, type = "response")
+pred_vals <- suppressWarnings(predict(model_logit1, s_dat_test, type = "response"))
 pred_model_logit1 <- (pred_vals > 0.5)
-table(pred = pred_model_logit1, true = dat_test$NOTCOV)
+pred1Logtable <- table(pred = pred_model_logit1, true = dat_test$NOTCOV)
+pred1Logtable
+goodlogpred <- sum((prop.table(pred1Logtable)[1,1])+(prop.table(pred1Logtable)[2,2]))
+# round(goodolspred*100, digits = 2)
 ```
-You can play around to see if the "predvals > 0.5" cutoff is best. These give a table about how the models predict.
+Given the standardized variables, we can compare the OLS and Logit regressions. While the values of each coefficient vary, the sign for each coefficient is the same across both regressions. The OLS regression is demonstrating the correlation of each variable with the condition of not having health insurance. The logit regression is giving us the probability of the condition of not having health insurance given each variable.
+
+Due to the standardization of the variables, the coefficients estimated by the OLS regression are all small - considering them as raw values gives us a skewed interpretation of the result; we need to consider where these the absolute values of the coefficients sit on the interval [0,1]. 
+
+The logit regression is more straightforward, as we would expect the probabilities to be given on a [0,1] interval.
+
+Changing the predvals parameter to > 0.45 increases the accuracy of both models, by 0.3% and 0.11% for the OLS and Logit models respectively. The increases are negligible. Leaving the Logit predvals value at > 0.5 makes more sense as 0.5 is a probability value in this model. Setting it to a value below 0.5 would skew the correct prediction rate of whether the dependent variable is equal to 1. The prediction rate of the OLS and Logit models are `r round(goodolspred*100, digits = 2)`% and `r round(goodlogpred*100, digits = 2)`% respectively.
 
 ### Random Forest
 Here is code for a Random Forest, which takes a bit of computing,

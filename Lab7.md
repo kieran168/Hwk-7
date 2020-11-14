@@ -133,126 +133,144 @@ the impact of outlying determining variables than Support Vector
 Machines [(James, Witten, Hastie and Tibshirani,
 p. 357)](https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf).
 
-Some of the estimation procedures are not as tolerant about factors so
-we need to set those as dummies. Some are also intolerant of NA values.
-I’ll show the code for the basic set of explanatory variables, which you
-can modify as you see fit.
+We’ve utilized the provided data.frame and standarizing code to
+standardize the variables and create our training and test sets. The
+training set is comprised of 75% of the observations.
 
-    ##      NOTCOV            Age            female            AfAm       
-    ##  Min.   :0.0000   Min.   :17.00   Min.   :0.0000   Min.   :0.0000  
-    ##  1st Qu.:0.0000   1st Qu.:30.00   1st Qu.:0.0000   1st Qu.:0.0000  
-    ##  Median :0.0000   Median :44.00   Median :1.0000   Median :0.0000  
-    ##  Mean   :0.1537   Mean   :43.94   Mean   :0.5205   Mean   :0.1415  
-    ##  3rd Qu.:0.0000   3rd Qu.:57.00   3rd Qu.:1.0000   3rd Qu.:0.0000  
-    ##  Max.   :1.0000   Max.   :75.00   Max.   :1.0000   Max.   :1.0000  
-    ##      Asian           RaceOther          Hispanic         educ_hs      
-    ##  Min.   :0.00000   Min.   :0.00000   Min.   :0.0000   Min.   :0.0000  
-    ##  1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.0000  
-    ##  Median :0.00000   Median :0.00000   Median :0.0000   Median :0.0000  
-    ##  Mean   :0.07181   Mean   :0.01866   Mean   :0.2038   Mean   :0.2623  
-    ##  3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:1.0000  
-    ##  Max.   :1.00000   Max.   :1.00000   Max.   :1.0000   Max.   :1.0000  
-    ##   educ_smcoll        educ_as         educ_bach         educ_adv      
-    ##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :0.00000  
-    ##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.00000  
-    ##  Median :0.0000   Median :0.0000   Median :0.0000   Median :0.00000  
-    ##  Mean   :0.1884   Mean   :0.1071   Mean   :0.1726   Mean   :0.09588  
-    ##  3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:0.00000  
-    ##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000   Max.   :1.00000  
-    ##     married          widowed          divorc_sep     Region.Midwest  
-    ##  Min.   :0.0000   Min.   :0.00000   Min.   :0.0000   Min.   :0.0000  
-    ##  1st Qu.:0.0000   1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.0000  
-    ##  Median :1.0000   Median :0.00000   Median :0.0000   Median :0.0000  
-    ##  Mean   :0.5351   Mean   :0.02987   Mean   :0.1089   Mean   :0.1996  
-    ##  3rd Qu.:1.0000   3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:0.0000  
-    ##  Max.   :1.0000   Max.   :1.00000   Max.   :1.0000   Max.   :1.0000  
-    ##   Region.South     Region.West     born.Mex.CentAm.Carib   born.S.Am      
-    ##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000        Min.   :0.00000  
-    ##  1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000        1st Qu.:0.00000  
-    ##  Median :0.0000   Median :0.0000   Median :0.0000        Median :0.00000  
-    ##  Mean   :0.3459   Mean   :0.2894   Mean   :0.1149        Mean   :0.01183  
-    ##  3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.0000        3rd Qu.:0.00000  
-    ##  Max.   :1.0000   Max.   :1.0000   Max.   :1.0000        Max.   :1.00000  
-    ##     born.Eur        born.f.USSR        born.Africa         born.MidE       
-    ##  Min.   :0.00000   Min.   :0.000000   Min.   :0.000000   Min.   :0.000000  
-    ##  1st Qu.:0.00000   1st Qu.:0.000000   1st Qu.:0.000000   1st Qu.:0.000000  
-    ##  Median :0.00000   Median :0.000000   Median :0.000000   Median :0.000000  
-    ##  Mean   :0.01413   Mean   :0.002664   Mean   :0.008144   Mean   :0.004273  
-    ##  3rd Qu.:0.00000   3rd Qu.:0.000000   3rd Qu.:0.000000   3rd Qu.:0.000000  
-    ##  Max.   :1.00000   Max.   :1.000000   Max.   :1.000000   Max.   :1.000000  
-    ##  born.India.subc     born.Asia        born.SE.Asia     born.elsewhere   
-    ##  Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
-    ##  1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
-    ##  Median :0.00000   Median :0.00000   Median :0.00000   Median :0.00000  
-    ##  Mean   :0.01328   Mean   :0.01382   Mean   :0.02384   Mean   :0.00514  
-    ##  3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
-    ##  Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
-    ##   born.unknown     
-    ##  Min.   :0.000000  
-    ##  1st Qu.:0.000000  
-    ##  Median :0.000000  
-    ##  Mean   :0.002878  
-    ##  3rd Qu.:0.000000  
-    ##  Max.   :1.000000
+#### OLS
 
-Next create a common data object that is standardized (check what it
-does\! run summary(sobj$data) ) and split into training and test sets. I
-have to use a very small training set to prevent my little laptop from
-running out of memory. You can try a bigger value like max=0.75 or
-similar. Summary(restrict\_1) will tell you how many are in the training
-set vs test.
-
-    ## Loading required package: standardize
-
-    ## Warning: package 'standardize' was built under R version 4.0.3
-
-    ## [1] 79572
-
-    ##    Mode   FALSE    TRUE 
-    ## logical   66393   13179
-
-    ##      NOTCOV              Age.V1        female   AfAm      Asian     RaceOther
-    ##  Min.   :0.0000   Min.   :-1.6923561   1:6914   1: 1884   1:  924   1:  244  
-    ##  1st Qu.:0.0000   1st Qu.:-0.8766675   0:6265   0:11295   0:12255   0:12935  
-    ##  Median :0.0000   Median : 0.0017663                                         
-    ##  Mean   :0.1487   Mean   : 0.0000000                                         
-    ##  3rd Qu.:0.0000   3rd Qu.: 0.8174549                                         
-    ##  Max.   :1.0000   Max.   : 1.9468699                                         
-    ##  Hispanic  educ_hs  educ_smcoll educ_as   educ_bach educ_adv  married 
-    ##  1: 2672   1:3358   1: 2457     1: 1516   1: 2305   1: 1308   1:7143  
-    ##  0:10507   0:9821   0:10722     0:11663   0:10874   0:11871   0:6036  
-    ##                                                                       
-    ##                                                                       
-    ##                                                                       
-    ##                                                                       
-    ##  widowed   divorc_sep Region.Midwest Region.South Region.West
-    ##  1:  373   1: 1419    1: 2576        1:4539       1:3863     
-    ##  0:12806   0:11760    0:10603        0:8640       0:9316     
-    ##                                                              
-    ##                                                              
-    ##                                                              
-    ##                                                              
-    ##  born.Mex.CentAm.Carib born.S.Am born.Eur  born.f.USSR born.Africa born.MidE
-    ##  1: 1523               1:  136   1:  182   1:   35     1:  118     1:   52  
-    ##  0:11656               0:13043   0:12997   0:13144     0:13061     0:13127  
-    ##                                                                             
-    ##                                                                             
-    ##                                                                             
-    ##                                                                             
-    ##  born.India.subc born.Asia born.SE.Asia born.elsewhere born.unknown
-    ##  1:  159         1:  183   1:  289      1:   89        1:   35     
-    ##  0:13020         0:12996   0:12890      0:13090        0:13144     
-    ##                                                                    
-    ##                                                                    
-    ##                                                                    
     ## 
+    ## Call:
+    ## lm(formula = sobj$formula, data = sobj$data)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.64347 -0.17562 -0.09177 -0.00847  1.06728 
+    ## 
+    ## Coefficients:
+    ##                         Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)             0.457555   0.032292  14.169  < 2e-16 ***
+    ## Age                    -0.040676   0.001660 -24.496  < 2e-16 ***
+    ## female1                -0.014050   0.001391 -10.100  < 2e-16 ***
+    ## AfAm1                  -0.012040   0.002124  -5.668 1.45e-08 ***
+    ## Asian1                 -0.017047   0.004504  -3.785 0.000154 ***
+    ## RaceOther1              0.036836   0.005204   7.079 1.47e-12 ***
+    ## Hispanic1               0.021955   0.002451   8.958  < 2e-16 ***
+    ## educ_hs1               -0.006280   0.002218  -2.832 0.004632 ** 
+    ## educ_smcoll1           -0.032028   0.002401 -13.339  < 2e-16 ***
+    ## educ_as1               -0.031766   0.002796 -11.362  < 2e-16 ***
+    ## educ_bach1             -0.058236   0.002496 -23.329  < 2e-16 ***
+    ## educ_adv1              -0.066090   0.002936 -22.510  < 2e-16 ***
+    ## married1               -0.026369   0.001787 -14.754  < 2e-16 ***
+    ## widowed1               -0.019298   0.004518  -4.271 1.95e-05 ***
+    ## divorc_sep1             0.003838   0.002621   1.464 0.143073    
+    ## Region.Midwest1         0.013818   0.002308   5.987 2.15e-09 ***
+    ## Region.South1           0.035328   0.002081  16.975  < 2e-16 ***
+    ## Region.West1            0.012189   0.002176   5.602 2.13e-08 ***
+    ## born.Mex.CentAm.Carib1  0.114031   0.002972  38.369  < 2e-16 ***
+    ## born.S.Am1              0.064050   0.006712   9.542  < 2e-16 ***
+    ## born.Eur1               0.015393   0.005745   2.679 0.007376 ** 
+    ## born.f.USSR1            0.046016   0.013322   3.454 0.000552 ***
+    ## born.Africa1            0.053062   0.007755   6.843 7.85e-12 ***
+    ## born.MidE1              0.014229   0.010581   1.345 0.178682    
+    ## born.India.subc1        0.041993   0.007429   5.653 1.59e-08 ***
+    ## born.Asia1              0.047528   0.007167   6.631 3.35e-11 ***
+    ## born.SE.Asia1           0.028574   0.006203   4.606 4.10e-06 ***
+    ## born.elsewhere1         0.013040   0.009681   1.347 0.178008    
+    ## born.unknown1           0.002700   0.012735   0.212 0.832101    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.3357 on 59598 degrees of freedom
+    ## Multiple R-squared:  0.1297, Adjusted R-squared:  0.1293 
+    ## F-statistic: 317.3 on 28 and 59598 DF,  p-value: < 2.2e-16
 
-Then start with some models. I’ll give code for the Linear Probability
-Model (ie good ol’ OLS) and logit, to show how to call those with the
-standarized object. \#\#\# LPM and OLS
+    ##        true
+    ## pred        0     1
+    ##   FALSE 16542  2660
+    ##   TRUE    285   458
 
-You can play around to see if the “predvals \> 0.5” cutoff is best.
-These give a table about how the models predict.
+#### Logit
+
+    ## 
+    ## Call:
+    ## glm(formula = sobj$formula, family = binomial, data = sobj$data)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.8479  -0.5807  -0.4028  -0.2500   2.9873  
+    ## 
+    ## Coefficients:
+    ##                        Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept)             0.52586    0.28955   1.816 0.069347 .  
+    ## Age                    -0.37604    0.01562 -24.069  < 2e-16 ***
+    ## female1                -0.11855    0.01241  -9.554  < 2e-16 ***
+    ## AfAm1                  -0.06342    0.01877  -3.379 0.000728 ***
+    ## Asian1                 -0.12145    0.04241  -2.864 0.004186 ** 
+    ## RaceOther1              0.24811    0.03831   6.476 9.41e-11 ***
+    ## Hispanic1               0.15787    0.01950   8.097 5.65e-16 ***
+    ## educ_hs1               -0.01242    0.01656  -0.750 0.453237    
+    ## educ_smcoll1           -0.21762    0.01918 -11.345  < 2e-16 ***
+    ## educ_as1               -0.21793    0.02399  -9.086  < 2e-16 ***
+    ## educ_bach1             -0.57293    0.02476 -23.139  < 2e-16 ***
+    ## educ_adv1              -0.87361    0.04078 -21.421  < 2e-16 ***
+    ## married1               -0.21032    0.01567 -13.418  < 2e-16 ***
+    ## widowed1               -0.17073    0.04856  -3.516 0.000438 ***
+    ## divorc_sep1             0.07916    0.02227   3.554 0.000379 ***
+    ## Region.Midwest1         0.14460    0.02309   6.264 3.76e-10 ***
+    ## Region.South1           0.33499    0.01998  16.769  < 2e-16 ***
+    ## Region.West1            0.14045    0.02110   6.657 2.80e-11 ***
+    ## born.Mex.CentAm.Carib1  0.65762    0.02152  30.562  < 2e-16 ***
+    ## born.S.Am1              0.52652    0.04881  10.787  < 2e-16 ***
+    ## born.Eur1               0.16952    0.05743   2.952 0.003158 ** 
+    ## born.f.USSR1            0.44475    0.11830   3.759 0.000170 ***
+    ## born.Africa1            0.46611    0.06236   7.474 7.76e-14 ***
+    ## born.MidE1              0.17140    0.10424   1.644 0.100121    
+    ## born.India.subc1        0.46334    0.07035   6.587 4.50e-11 ***
+    ## born.Asia1              0.47606    0.06476   7.351 1.97e-13 ***
+    ## born.SE.Asia1           0.25315    0.05979   4.234 2.30e-05 ***
+    ## born.elsewhere1         0.14647    0.09361   1.565 0.117686    
+    ## born.unknown1           0.07727    0.10869   0.711 0.477121    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 50985  on 59626  degrees of freedom
+    ## Residual deviance: 43533  on 59598  degrees of freedom
+    ## AIC: 43591
+    ## 
+    ## Number of Fisher Scoring iterations: 6
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 16571  2700
+    ##   TRUE    256   418
+
+Given the standardized variables, we can compare the OLS and Logit
+regressions. While the values of each coefficient vary, the sign for
+each coefficient is the same across both regressions. The OLS regression
+is demonstrating the correlation of each variable with the condition of
+not having health insurance. The logit regression is giving us the
+probability of the condition of not having health insurance given each
+variable.
+
+Due to the standardization of the variables, the coefficients estimated
+by the OLS regression are all small - considering them as raw values
+gives us a skewed interpretation of the result; we need to consider
+where these the absolute values of the coefficients sit on the interval
+\[0,1\].
+
+The logit regression is more straightforward, as we would expect the
+probabilities to be given on a \[0,1\] interval.
+
+Changing the predvals parameter to \> 0.45 increases the accuracy of
+both models, by 0.3% and 0.11% for the OLS and Logit models
+respectively. The increases are negligible. Leaving the Logit predvals
+value at \> 0.5 makes more sense as 0.5 is a probability value in this
+model. Setting it to a value below 0.5 would skew the correct prediction
+rate of whether the dependent variable is equal to 1. The prediction
+rate of the OLS and Logit models are 85.23% and 85.18% respectively.
 
 ### Random Forest
 
