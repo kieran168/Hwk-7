@@ -10,27 +10,19 @@ knitr::opts_chunk$set(echo = FALSE)
 load("NHIS_2014.RData")
 ```
 
-For this lab, we will shake things up -- a different dataset! We'll estimate a variety of models to try to predict if a person has health insurance. Start with logit like last week then some different models: Random Forest, Support Vector Machines, and Elastic Net (which is not optimal for a 0/1 dependent but it works for a demonstration).
-
-Download the NHIS data and load it into R. If you do a summary of the data, you will see that it includes a variety of people of all ages.
-
-```{r Summary Data Use1}
-# summary(data_use1)
-```
-We want to understand what factors make an adult more likely to have health insurance. Some of the variable names are a bit mystifying: disabl_limit codes 0/1 if the person has any limitations from a disability; RRP codes relationship to the person answering the question; HHX, FMX, and FPX just are ID numbers; SCHIP is a children's healthcare system; sptn_medical is a factor telling how much the person spent on medical bills. This is only a tiny fraction of the information in that survey; there are more than 1000 different variables.
-
-The person's earnings could use a bit of recoding,
 ```{r Recode Earn_LastYr}
 data_use1$earn_lastyr <- as.factor(data_use1$ERNYR_P)
 levels(data_use1$earn_lastyr) <- c("0","$01-$4999","$5000-$9999","$10000-$14999","$15000-$19999","$20000-$24999","$25000-$34999","$35000-$44999","$45000-$54999","$55000-$64999","$65000-$74999","$75000 and over",NA,NA,NA)
 ```
+### Predicting Health Insurance Coverage
+Using the provided data from the National Health Interview Survey 2014, we took a subset of respondents between the ages of 17 and 75. We chose this particular range with a view to further possible subgroups, such as examining the changes in insurance coverage from those of college age up to 26 and those in their late 20s and early 30s, who are [no longer eligible](https://www.healthcare.gov/young-adults/children-under-26/) to be claimed on their parents' plans.
 ```{r Create Dat2 Props}
 dat2 <- subset(data_use1, ((AGE_P >= 17) & (AGE_P <= 75)))
 covprop <- dat2$NOTCOV 
 covtable <- table(covprop)
 agecovtable <- table(dat2$AGE_P, dat2$NOTCOV)
 colnames(agecovtable) <- c("Covered", "Not Covered")
-addmargins(agecovtable)
+agetable <- addmargins(agecovtable)
 names(covtable) <- c("Covered", "Not Covered")
 addmargins(covtable)
 prop.table(covtable)
@@ -223,7 +215,30 @@ pred1_elasnet <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = 
 pred_model1_elasnet <- (pred1_elasnet < mean(pred1_elasnet)) 
 table(pred = pred_model1_elasnet, true = dat_test$NOTCOV)
 model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
+model2_elasticnet
 # or try different alpha values to see if you can improve
+```
+```{r Elastic Net v2, eval=FALSE}
+model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
+model2_elasticnet
+par(mar=c(4.5,4.5,1,4))
+plot(model2_elasticnet)
+vnat=coef(model2_elasticnet)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=0.5)
+plot(model2_elasticnet, xvar = "lambda")
+plot(model2_elasticnet, xvar = "dev", label = TRUE)
+cvmodel2_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
+cvmodel2_elasticnet$lambda.min
+log(cvmodel2_elasticnet$lambda.min)
+coef(cvmodel2_elasticnet, s = "lambda.min")
+pred2_elasnet <- predict(model2_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel2_elasticnet$lambda.min)
+pred_model2_elasnet <- (pred2_elasnet < mean(pred2_elasnet)) 
+table(pred = pred_model2_elasnet, true = dat_test$NOTCOV)
 ```
 
 When you summarize, you should be able to explain which models predict best (noting if there is a tradeoff of false positive vs false negative) and if there are certain explanatory variables that are consistently more or less useful. Also try other lists of explanatory variables.
+
+
+###Bibliography
+https://www.healthcare.gov/young-adults/children-under-26/

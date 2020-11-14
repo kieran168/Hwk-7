@@ -2,88 +2,15 @@ Lab 7
 ================
 Marjan Rezvani, Patrick Sinclair, Kieran Yuen
 
-For this lab, we will shake things up – a different dataset\! We’ll
-estimate a variety of models to try to predict if a person has health
-insurance. Start with logit like last week then some different models:
-Random Forest, Support Vector Machines, and Elastic Net (which is not
-optimal for a 0/1 dependent but it works for a demonstration).
+### Predicting Health Insurance Coverage
 
-Download the NHIS data and load it into R. If you do a summary of the
-data, you will see that it includes a variety of people of all ages.
-
-We want to understand what factors make an adult more likely to have
-health insurance. Some of the variable names are a bit mystifying:
-disabl\_limit codes 0/1 if the person has any limitations from a
-disability; RRP codes relationship to the person answering the question;
-HHX, FMX, and FPX just are ID numbers; SCHIP is a children’s healthcare
-system; sptn\_medical is a factor telling how much the person spent on
-medical bills. This is only a tiny fraction of the information in that
-survey; there are more than 1000 different variables.
-
-The person’s earnings could use a bit of recoding,
-
-    ##      
-    ##       Covered Not Covered   Sum
-    ##   17     1398         124  1522
-    ##   18     1313         182  1495
-    ##   19     1039         253  1292
-    ##   20     1118         265  1383
-    ##   21     1052         309  1361
-    ##   22     1103         309  1412
-    ##   23     1131         300  1431
-    ##   24     1143         316  1459
-    ##   25     1134         318  1452
-    ##   26     1063         394  1457
-    ##   27     1114         362  1476
-    ##   28     1119         370  1489
-    ##   29     1173         362  1535
-    ##   30     1201         341  1542
-    ##   31     1124         334  1458
-    ##   32     1158         358  1516
-    ##   33     1169         333  1502
-    ##   34     1181         333  1514
-    ##   35     1152         302  1454
-    ##   36     1075         312  1387
-    ##   37     1020         308  1328
-    ##   38     1125         315  1440
-    ##   39     1110         273  1383
-    ##   40     1242         279  1521
-    ##   41     1211         251  1462
-    ##   42     1210         279  1489
-    ##   43     1202         244  1446
-    ##   44     1279         239  1518
-    ##   45     1276         252  1528
-    ##   46     1184         262  1446
-    ##   47     1201         239  1440
-    ##   48     1249         233  1482
-    ##   49     1219         213  1432
-    ##   50     1452         272  1724
-    ##   51     1312         216  1528
-    ##   52     1408         216  1624
-    ##   53     1365         215  1580
-    ##   54     1345         183  1528
-    ##   55     1369         187  1556
-    ##   56     1342         163  1505
-    ##   57     1336         147  1483
-    ##   58     1254         155  1409
-    ##   59     1287         152  1439
-    ##   60     1258         155  1413
-    ##   61     1144         119  1263
-    ##   62     1223         132  1355
-    ##   63     1110         118  1228
-    ##   64     1047         124  1171
-    ##   65     1146          36  1182
-    ##   66     1175          12  1187
-    ##   67     1096          13  1109
-    ##   68      896           6   902
-    ##   69      881           8   889
-    ##   70      910           9   919
-    ##   71      802           8   810
-    ##   72      708           2   710
-    ##   73      727           7   734
-    ##   74      651           4   655
-    ##   75      611           6   617
-    ##   Sum   67343       12229 79572
+Using the provided data from the National Health Interview Survey 2014,
+we took a subset of respondents between the ages of 17 and 75. We chose
+this particular range with a view to further possible subgroups, such as
+examining the changes in insurance coverage from those of college age up
+to 26 and those in their late 20s and early 30s, who are [no longer
+eligible](https://www.healthcare.gov/young-adults/children-under-26/) to
+be claimed on their parents’ plans.
 
     ##     Covered Not Covered         Sum 
     ##       67343       12229       79572
@@ -302,3 +229,6 @@ When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
 and if there are certain explanatory variables that are consistently
 more or less useful. Also try other lists of explanatory variables.
+
+\#\#\#Bibliography
+<https://www.healthcare.gov/young-adults/children-under-26/>
