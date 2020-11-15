@@ -276,8 +276,6 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
-    ## Warning: package 'randomForest' was built under R version 4.0.3
-
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -437,6 +435,37 @@ For a health insurance company, the tolerance of misclassification may
 be higher. A person who was predicted to not have coverage can still be
 pitched with other health insurance products if they already have some
 sort of coverage.
+
+    ## Loading required package: e1071
+
+    ##     true
+    ## pred          0          1
+    ##    0 0.82156909 0.12518222
+    ##    1 0.02357552 0.02967317
+
+    ## [1] 0.8512423
+
+Running the SVM as given produces a correct prediction rate of 85.12%.
+We can change the SVM model by adjusted the cost and gamma parameters.
+The cost parameter determines the tolerance the model has to violations
+of the margins of the separating plane; the higher the cost, the
+narrower the margin, which produces results with high variance but a
+lower bias. With higher variance, the model may give [different
+estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/)
+for the function of the separating plane when applied to different data
+sets. If we want to lower the variance to keep estimates produced by the
+model similar as we change data sets, we need to increase the bias - we
+have to accept that the model makes more assumptions about the form of
+the separating function. To keep estimates more consistent across
+different data sets, we have to accept that the model will lose
+predictive power.
+
+If we are comfortable with the data set at hand and seek strong
+predictive power, we can set our cost high, increasing the variance and
+lowering the bias of the model - similar to a logistic model. If we wish
+to look at multiple data-sets, to assess correlation and causality, the
+SVM model has to be adjusted with lower cost, reducing the variance and
+increasing the bias - similar to an OLS model.
 
 ### Elastic Net
 
