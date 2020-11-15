@@ -276,8 +276,6 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
-    ## Warning: package 'randomForest' was built under R version 4.0.3
-
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -393,8 +391,6 @@ parameter, next uses those optimal values to train. (Tuning takes a long
 time so skip for now\!)
 
     ## Loading required package: e1071
-
-    ## Warning: package 'e1071' was built under R version 4.0.3
 
     ##     true
     ## pred          0          1

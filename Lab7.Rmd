@@ -214,56 +214,141 @@ If we are comfortable with the data set at hand and seek strong predictive power
 
 ### Elastic Net
 Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
-```{r Elastic Net, eval = FALSE}
+```{r Elastic Net Regression, eval = FALSE}
 # Elastic Net
 # install.packages("glmnet")
 # install.packages("vip")
 require(vip)
 require(glmnet)
-model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0)
-# default is alpha = 1, lasso
+model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5)
+
 par(mar=c(4.5,4.5,1,4))
 plot(model1_elasticnet)
 vnat=coef(model1_elasticnet)
 vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
 axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=0.5) 
+
 plot(model1_elasticnet, xvar = "lambda")
 plot(model1_elasticnet, xvar = "dev", label = TRUE)
 print(model1_elasticnet)
 vip(model1_elasticnet, num_features = 50, geom = "point")
-vip(cvmodel1_elasticnet, num_features = 50, geom = "point")
 #https://bradleyboehmke.github.io/HOML/regularized-regression.html
+
 cvmodel1_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
 cvmodel1_elasticnet$lambda.min
 log(cvmodel1_elasticnet$lambda.min)
 coef(cvmodel1_elasticnet, s = "lambda.min")
+
 pred1_elasnet <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_elasticnet$lambda.min)
 pred_model1_elasnet <- (pred1_elasnet < mean(pred1_elasnet)) 
-table(pred = pred_model1_elasnet, true = dat_test$NOTCOV)
-model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
-model2_elasticnet
-# or try different alpha values to see if you can improve
-```
-```{r Elastic Net v2, eval=FALSE}
-model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
-model2_elasticnet
-par(mar=c(4.5,4.5,1,4))
-plot(model2_elasticnet)
-vnat=coef(model2_elasticnet)
-vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
-axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=0.5)
-plot(model2_elasticnet, xvar = "lambda")
-plot(model2_elasticnet, xvar = "dev", label = TRUE)
-cvmodel2_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
-cvmodel2_elasticnet$lambda.min
-log(cvmodel2_elasticnet$lambda.min)
-coef(cvmodel2_elasticnet, s = "lambda.min")
-pred2_elasnet <- predict(model2_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel2_elasticnet$lambda.min)
-pred_model2_elasnet <- (pred2_elasnet < mean(pred2_elasnet)) 
-table(pred = pred_model2_elasnet, true = dat_test$NOTCOV)
 
-# Try different alpha values to see if you can improve
+table(pred = pred_model1_elasnet, true = dat_test$NOTCOV)
+ElasticNetpredtable <- table(pred = pred_model1_elasnet, true = dat_test$NOTCOV)
+ElasticNetproppred <- prop.table(ElasticNetpredtable)
+ElasticNetproppred
+ElasticNetgoodpred <- sum((ElasticNetproppred[1,1])+(ElasticNetproppred[2,2]))
+ElasticNetgoodpred
+
+model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
+model2_elasticnet
 ```
+
+
+
+```{r Ridge Regression, eval = FALSE}
+# Ridge
+# install.packages("glmnet")
+# install.packages("vip")
+require(vip)
+require(glmnet)
+model1_ridge <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0)
+
+par(mar=c(4.5,4.5,1,4))
+plot(model1_ridge)
+vnat=coef(model1_ridge)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=0.5) 
+
+plot(model1_ridge, xvar = "lambda")
+plot(model1_ridge, xvar = "dev", label = TRUE)
+print(model1_ridge)
+vip(model1_ridge, num_features = 50, geom = "point")
+#https://bradleyboehmke.github.io/HOML/regularized-regression.html
+
+cvmodel1_ridge = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
+cvmodel1_ridge$lambda.min
+log(cvmodel1_ridge$lambda.min)
+coef(cvmodel1_ridge, s = "lambda.min")
+
+pred1_ridge <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_ridge$lambda.min)
+pred_model1_ridge <- (pred1_ridge < mean(pred1_ridge)) 
+
+table(pred = pred_model1_ridge, true = dat_test$NOTCOV)
+Ridgepredtable <- table(pred = pred_model1_ridge, true = dat_test$NOTCOV)
+RidgeNetproppred <- prop.table(Ridgepredtable)
+RidgeNetproppred
+Ridgegoodpred <- sum((RidgeNetproppred[1,1])+(RidgeNetproppred[2,2]))
+Ridgegoodpred
+
+model2_ridge <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0) 
+model2_ridge
+```
+
+```{r Lasso Regression, eval = FALSE}
+# Lasso
+# install.packages("glmnet")
+# install.packages("vip")
+require(vip)
+require(glmnet)
+model1_lasso <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 1)
+
+par(mar=c(4.5,4.5,1,4))
+plot(model1_lasso)
+vnat=coef(model1_lasso)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=0.5) 
+
+plot(model1_lasso, xvar = "lambda")
+plot(model1_lasso, xvar = "dev", label = TRUE)
+print(model1_lasso)
+vip(model1_lasso, num_features = 50, geom = "point")
+#https://bradleyboehmke.github.io/HOML/regularized-regression.html
+
+cvmodel1_lasso = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
+cvmodel1_lasso$lambda.min
+log(cvmodel1_lasso$lambda.min)
+coef(cvmodel1_lasso, s = "lambda.min")
+
+pred1_lasso <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_lasso$lambda.min)
+pred_model1_lasso <- (pred1_lasso < mean(pred1_lasso)) 
+
+table(pred = pred_model1_lasso, true = dat_test$NOTCOV)
+Lassopredtable <- table(pred = pred_model1_lasso, true = dat_test$NOTCOV)
+LassoNetproppred <- prop.table(Lassopredtable)
+LassoNetproppred
+Lassogoodpred <- sum((LassoNetproppred[1,1])+(LassoNetproppred[2,2]))
+Lassogoodpred
+
+model2_lasso <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 1) 
+model2_lasso
+```
+
+```{r Comparison, eval = FALSE}
+table(pred = pred_model1_elasnet, true = dat_test$NOTCOV)
+table(pred = pred_model1_ridge, true = dat_test$NOTCOV)
+table(pred = pred_model1_lasso, true = dat_test$NOTCOV)
+
+
+ElasticNetproppred
+RidgeNetproppred
+LassoNetproppred
+
+
+ElasticNetgoodpred
+Ridgegoodpred
+Lassogoodpred
+```
+
 When you summarize, you should be able to explain which models predict best (noting if there is a tradeoff of false positive vs false negative) and if there are certain explanatory variables that are consistently more or less useful. Also try other lists of explanatory variables.
 
 
