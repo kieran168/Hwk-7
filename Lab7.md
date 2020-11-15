@@ -386,9 +386,55 @@ applied to the overall test data.
 
 ### Support Vector Machines
 
-Next is Support Vector Machines. First it tries to find optimal tuning
-parameter, next uses those optimal values to train. (Tuning takes a long
-time so skip for now\!)
+    ## Loading required package: e1071
+
+    ## Warning: package 'e1071' was built under R version 4.0.3
+
+    ##     true
+    ## pred     0     1
+    ##    0 52412  7986
+    ##    1  1504  1893
+
+    ##     true
+    ## pred          0          1
+    ##    0 0.82156909 0.12518222
+    ##    1 0.02357552 0.02967317
+
+Running the SVM as given produces a correct prediction rate of 85.12%.
+We can change the SVM model by adjusted the cost and gamma parameters.
+The cost parameter determines the tolerance the model has to violations
+of the margins of the separating plane; the higher the cost, the
+narrower the margin, which produces results with high variance but a
+lower bias. With higher variance, the model may give [different
+estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/)
+for the function of the separating plane when applied to different data
+sets. If we want to lower the variance to keep estimates produced by the
+model similar as we change data sets, we need to increase the bias - we
+have to accept that the model makes more assumptions about the form of
+the separating function. To keep estimates more consistent across
+different data sets, we have to accept that the model will lose
+predictive power.
+
+If we are comfortable with the data set at hand and seek strong
+predictive power, we can set our cost high, increasing the variance and
+lowering the bias of the model - similar to a logistic model. If we wish
+to look at multiple data-sets, to assess correlation and causality, the
+SVM model has to be adjusted with lower cost, reducing the variance and
+increasing the bias - similar to an OLS model.
+
+Changing the gamma value in the model adjusts the flexibility of the
+separating plane. We removed the gamma value from the model and saw that
+while our True Negative prediction rate increased by 0.74%, our True
+Positive rate decreased by 0.22%. The trade off of these change in
+predictions depends on the context of the person asking the questions of
+the model. For a policy maker, correctly identifying those who lack
+healthcare coverage is important. Misallocating resources to provide
+health services to demographics that already have good access to those
+service is a waste of critical government infrastructure and revenues.
+For a health insurance company, the tolerance of misclassification may
+be higher. A person who was predicted to not have coverage can still be
+pitched with other health insurance products if they already have some
+sort of coverage.
 
     ## Loading required package: e1071
 
