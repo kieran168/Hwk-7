@@ -164,17 +164,17 @@ RFpredtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
 RFpredtable
 ```
 ```{r Proportions of Correct Prediction}
-proppred <- prop.table(RFpredtable)
+RFproppred <- prop.table(RFpredtable)
 # proppred
-goodpred <- sum((proppred[1,1])+(proppred[2,2]))
+RFgoodpred <- sum((RFproppred[1,1])+(RFproppred[2,2]))
 # goodpred
-falsepos <- proppred[2,1]
-falseneg <- proppred[1,2]
+RFfalsepos <- RFproppred[2,1]
+RFfalseneg <- RFproppred[1,2]
 # falsepos
 # falseneg
 # round(goodpred*100, digits = 2)
 ```
-Our Random Forest model gives us a correct prediction rate within the test data of `r round(goodpred*100, digits = 2)`% and it provides us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impacting on predicting that an observation *does not* have health coverage.
+Our Random Forest model gives us a correct prediction rate within the test data of `r round(RFgoodpred*100, digits = 2)`% and it provides us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impacting on predicting that an observation *does not* have health coverage.
 
 We can use the variable importance generated from the Random Forest to redesign our earlier OLS and Logit models and remove the less important variables.
 
@@ -193,21 +193,22 @@ print(best.m)
 
 The optimal mtry number is 5, which in concert with a smaller number of trees reduced the Out of Box error rate from 13.77% to `r round((best.m[2])*100, digits = 2)`%. This rate tells us that as the model makes the splits and performs prediction tests on internally designated training and test data, it makes errors at a rate of `r round((best.m[2])*100, digits = 2)`%, performing slightly better than when the model is applied to the overall test data. 
 
-
-Note that the estimation prints out a Confusion Matrix first but that's within the training data; the later one calculates how well it does on the test data.
-
 ### Support Vector Machines
 Next is Support Vector Machines. First it tries to find optimal tuning parameter, next uses those optimal values to train. (Tuning takes a long time so skip for now!)
-```{r Support Vector Machines, eval = FALSE}
-# install.packages("e1071")
+```{r Support Vector Machines}
 require(e1071)
 # tuned_parameters <- tune.svm(as.factor(NOTCOV) ~ ., data = sobj$data, gamma = 10^(-3:0), cost = 10^(-2:1)) 
 # summary(tuned_parameters)
 # figure best parameters and input into next
 svm.model <- svm(as.factor(NOTCOV) ~ ., data = sobj$data, cost = 10, gamma = 0.1)
 svm.pred <- predict(svm.model, s_dat_test)
-table(pred = svm.pred, true = dat_test$NOTCOV)
+SVMpredtable <- table(pred = svm.pred, true = dat_test$NOTCOV)
+SVMproppred <- prop.table(SVMpredtable)
+SVMproppred
+SVMgoodpred <- sum((SVMproppred[1,1])+(SVMproppred[2,2]))
+SVMgoodpred
 ```
+Running the SVM as given produces a correct prediction rate of `r round(SVMgoodpred*100, digits = 2)`%. We can change the SVM model by adjusted the cost and gamma parameters. The cost parameter determines the tolerance the model has to violations of the margins of the separating plane; the higher the cost, the narrower the margin, which produces results with high variance but a lower bias. With higher variance, the model may give [different estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/) for the function of the separating plane when applied to different data sets. If we want to lower the variance to keep estimates produced by the model similar as we change data sets, we need to increase the bias - we have to accept that the model makes more assumptions about the form of the separating function. To keep estimates more consistent across different data sets, we have to accept that the model will lose predictive power.
 
 ### Elastic Net
 Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
@@ -265,9 +266,11 @@ When you summarize, you should be able to explain which models predict best (not
 
 
 ### Bibliography  
-ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf
+[ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf](ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/Dataset_Documentation/NHIS/2014/personsx_layout.pdf)
 
 https://www.healthcare.gov/young-adults/children-under-26/
 
-James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani, (2017). Introduction to Statistical Learning. New York: Springer Science+Business Media, https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf 
+Brownlee, Jason, (2016). "Support Vector Machines for Machine Learning", https://machinelearningmastery.com/support-vector-machines-for-machine-learning/
+
+James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani, (2017). "Introduction to Statistical Learning", New York: Springer Science+Business Media, https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf 
 

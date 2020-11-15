@@ -386,15 +386,37 @@ tests on internally designated training and test data, it makes errors
 at a rate of 13.67%, performing slightly better than when the model is
 applied to the overall test data.
 
-Note that the estimation prints out a Confusion Matrix first but that’s
-within the training data; the later one calculates how well it does on
-the test data.
-
 ### Support Vector Machines
 
 Next is Support Vector Machines. First it tries to find optimal tuning
 parameter, next uses those optimal values to train. (Tuning takes a long
 time so skip for now\!)
+
+    ## Loading required package: e1071
+
+    ## Warning: package 'e1071' was built under R version 4.0.3
+
+    ##     true
+    ## pred          0          1
+    ##    0 0.82156909 0.12518222
+    ##    1 0.02357552 0.02967317
+
+    ## [1] 0.8512423
+
+Running the SVM as given produces a correct prediction rate of 85.12%.
+We can change the SVM model by adjusted the cost and gamma parameters.
+The cost parameter determines the tolerance the model has to violations
+of the margins of the separating plane; the higher the cost, the
+narrower the margin, which produces results with high variance but a
+lower bias. With higher variance, the model may give [different
+estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/)
+for the function of the separating plane when applied to different data
+sets. If we want to lower the variance to keep estimates produced by the
+model similar as we change data sets, we need to increase the bias - we
+have to accept that the model makes more assumptions about the form of
+the separating function. To keep estimates more consistent across
+different data sets, we have to accept that the model will lose
+predictive power.
 
 ### Elastic Net
 
@@ -413,7 +435,10 @@ more or less useful. Also try other lists of explanatory variables.
 
 <https://www.healthcare.gov/young-adults/children-under-26/>
 
+Brownlee, Jason, (2016). “Support Vector Machines for Machine Learning”,
+<https://machinelearningmastery.com/support-vector-machines-for-machine-learning/>
+
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani,
-(2017). Introduction to Statistical Learning. New York: Springer
+(2017). “Introduction to Statistical Learning”, New York: Springer
 Science+Business Media,
 <https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf>
