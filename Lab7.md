@@ -333,7 +333,7 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
     ##    1   920  1610
 
 Our Random Forest model gives us a correct prediction rate within the
-test data of 85.6% but it also gives us some clearer insight into the
+test data of 85.6% and it provides us some clearer insight into the
 variables that are important to the accuracy of the model. We can see
 from both the Mean Accuracy Decrease and the Mean Gini Decrease that
 age, the education variables and the race variables are important to the
@@ -343,6 +343,56 @@ America and Mexico, Central America and the Caribbean with the highest
 importance link to the race variable with the highest importance,
 i.e. Hispanic. The Hispanic variable has a large impacting on
 predicting that an observation *does not* have health coverage.
+
+We can use the variable importance generated from the Random Forest to
+redesign our earlier OLS and Logit models and remove the less important
+variables.
+
+Prior to that, we should tune our Random Forest model to determine the
+optimal number of variables used at each split of the data. We can also
+change the number of trees to make the model easier to compute.
+
+Here is some code to tune the Random Forest for mtry (the number of
+variables used at each split). The number of trees in the forest has
+also been reduced to 100.
+
+``` r
+mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 1.5, improve = 0.05, trace = TRUE, plot = TRUE)
+```
+
+    ## mtry = 5  OOB error = 13.67% 
+    ## Searching left ...
+    ## mtry = 4     OOB error = 13.83% 
+    ## -0.01205937 0.05 
+    ## Searching right ...
+    ## mtry = 7     OOB error = 13.74% 
+    ## -0.005565863 0.05
+
+![](Lab7_files/figure-gfm/Optimal%20Variable%20Code%20for%20Random%20Forest-1.png)<!-- -->
+
+``` r
+mtry
+```
+
+    ##       mtry  OOBError
+    ## 4.OOB    4 0.1383026
+    ## 5.OOB    5 0.1366546
+    ## 7.OOB    7 0.1374152
+
+``` r
+best.m <- mtry[mtry[, 2] == min(mtry[, 2]), (1:2)]
+print(best.m)
+```
+
+    ##      mtry  OOBError 
+    ## 5.0000000 0.1366546
+
+The optimal mtry number is 5, which in concert with a smaller number of
+trees reduced the Out of Box error rate from 13.77% to 13.6654624%. This
+rate tells us that as the model makes the splits and performs prediction
+tests on internally designated training and test data, it makes errors
+at a rate of 13.6654624%, performing slightly better than when the model
+is applied to the overall test data.
 
 Note that the estimation prints out a Confusion Matrix first but that’s
 within the training data; the later one calculates how well it does on

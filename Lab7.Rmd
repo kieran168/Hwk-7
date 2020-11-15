@@ -171,16 +171,24 @@ falseneg <- proppred[1,2]
 # falseneg
 # round(goodpred*100, digits = 2)
 ```
-Our Random Forest model gives us a correct prediction rate within the test data of `r round(goodpred*100, digits = 2)`% but it also gives us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impacting on predicting that an observation *does not* have health coverage.
+Our Random Forest model gives us a correct prediction rate within the test data of `r round(goodpred*100, digits = 2)`% and it provides us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impacting on predicting that an observation *does not* have health coverage.
 
+We can use the variable importance generated from the Random Forest to redesign our earlier OLS and Logit models and remove the less important variables.
 
-```{r Optimal Variable Code for Random Forest, eval=FALSE}
-mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 2, improve = 0.5, trace = TRUE, plot = TRUE)
+Prior to that, we should tune our Random Forest model to determine the optimal number of variables used at each split of the data. We can also change the number of trees to make the model easier to compute.
+
+Here is some code to tune the Random Forest for mtry (the number of variables used at each split). The number of trees in the forest has also been reduced to 100. 
+
+```{r Optimal Variable Code for Random Forest, echo=TRUE}
+mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 1.5, improve = 0.05, trace = TRUE, plot = TRUE)
 mtry
 best.m <- mtry[mtry[, 2] == min(mtry[, 2]), (1:2)]
-print(mtry)
 print(best.m)
 ```
+
+The optimal mtry number is 5, which in concert with a smaller number of trees reduced the Out of Box error rate from 13.77% to `r (best.m[2])*100`%. This rate tells us that as the model makes the splits and performs prediction tests on internally designated training and test data, it makes errors at a rate of `r (best.m[2])*100`%, performing slightly better than when the model is applied to the overall test data. 
+
+
 Note that the estimation prints out a Confusion Matrix first but that's within the training data; the later one calculates how well it does on the test data.
 
 ### Support Vector Machines
