@@ -252,7 +252,7 @@ regressions. While the values of each coefficient vary, the sign for
 each coefficient is the same across both regressions. The OLS regression
 is demonstrating the correlation of each variable with the condition of
 not having health insurance. The logit regression is giving us the
-probability of the condition of not having health insurance given each
+probability of the condition of not having health insurance, given each
 variable.
 
 Due to the standardization of the variables, the coefficients estimated
@@ -342,8 +342,8 @@ accuracy of the model. Interestingly enough, region of birth is
 unimportant to the accuracy of this model - the two birth regions, Sth
 America and Mexico, Central America and the Caribbean with the highest
 importance link to the race variable with the highest importance,
-i.e. Hispanic. The Hispanic variable has a large impacting on
-predicting that an observation *does not* have health coverage.
+i.e. Hispanic. The Hispanic variable has a large impact on predicting
+that an observation *does not* have health coverage.
 
 We can use the variable importance generated from the Random Forest to
 redesign our earlier OLS and Logit models and remove the less important
@@ -417,6 +417,13 @@ have to accept that the model makes more assumptions about the form of
 the separating function. To keep estimates more consistent across
 different data sets, we have to accept that the model will lose
 predictive power.
+
+If we are comfortable with the data set at hand and seek strong
+predictive power, we can set our cost high, increasing the variance and
+lowering the bias of the model - similar to a logistic model. If we wish
+to look at multiple data-sets, to assess correlation and causality, the
+SVM model has to be adjusted with lower cost, reducing the variance and
+increasing the bias - similar to an OLS model.
 
 ### Elastic Net
 

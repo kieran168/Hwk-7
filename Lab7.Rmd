@@ -139,7 +139,7 @@ pred1Logtable
 goodlogpred <- sum((prop.table(pred1Logtable)[1,1])+(prop.table(pred1Logtable)[2,2]))
 # round(goodolspred*100, digits = 2)
 ```
-Given the standardized variables, we can compare the OLS and Logit regressions. While the values of each coefficient vary, the sign for each coefficient is the same across both regressions. The OLS regression is demonstrating the correlation of each variable with the condition of not having health insurance. The logit regression is giving us the probability of the condition of not having health insurance given each variable.
+Given the standardized variables, we can compare the OLS and Logit regressions. While the values of each coefficient vary, the sign for each coefficient is the same across both regressions. The OLS regression is demonstrating the correlation of each variable with the condition of not having health insurance. The logit regression is giving us the probability of the condition of not having health insurance, given each variable.
 
 Due to the standardization of the variables, the coefficients estimated by the OLS regression are all small - considering them as raw values gives us a skewed interpretation of the result; we need to consider where these the absolute values of the coefficients sit on the interval [0,1]. 
 
@@ -158,7 +158,7 @@ varImpPlot(model_randFor)
 # look at confusion matrix for this too
 ```
 ![RF Plot](./RFPlot.png)
-```{r}
+```{r RFPred}
 pred_model1 <- predict(model_randFor,  s_dat_test)
 RFpredtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
 RFpredtable
@@ -174,7 +174,7 @@ RFfalseneg <- RFproppred[1,2]
 # falseneg
 # round(goodpred*100, digits = 2)
 ```
-Our Random Forest model gives us a correct prediction rate within the test data of `r round(RFgoodpred*100, digits = 2)`% and it provides us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impacting on predicting that an observation *does not* have health coverage.
+Our Random Forest model gives us a correct prediction rate within the test data of `r round(RFgoodpred*100, digits = 2)`% and it provides us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impact on predicting that an observation *does not* have health coverage.
 
 We can use the variable importance generated from the Random Forest to redesign our earlier OLS and Logit models and remove the less important variables.
 
@@ -185,7 +185,7 @@ Here is some code to tune the Random Forest for mtry (the number of variables us
 ```{r Optimal Variable Code for Random Forest, echo=TRUE}
 mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 1.5, improve = 0.05, trace = TRUE, plot = TRUE)
 ```
-```{r}
+```{r mtry}
 mtry
 best.m <- mtry[mtry[, 2] == min(mtry[, 2]), (1:2)]
 print(best.m)
@@ -209,6 +209,8 @@ SVMgoodpred <- sum((SVMproppred[1,1])+(SVMproppred[2,2]))
 SVMgoodpred
 ```
 Running the SVM as given produces a correct prediction rate of `r round(SVMgoodpred*100, digits = 2)`%. We can change the SVM model by adjusted the cost and gamma parameters. The cost parameter determines the tolerance the model has to violations of the margins of the separating plane; the higher the cost, the narrower the margin, which produces results with high variance but a lower bias. With higher variance, the model may give [different estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/) for the function of the separating plane when applied to different data sets. If we want to lower the variance to keep estimates produced by the model similar as we change data sets, we need to increase the bias - we have to accept that the model makes more assumptions about the form of the separating function. To keep estimates more consistent across different data sets, we have to accept that the model will lose predictive power.
+
+If we are comfortable with the data set at hand and seek strong predictive power, we can set our cost high, increasing the variance and lowering the bias of the model - similar to a logistic model. If we wish to look at multiple data-sets, to assess correlation and causality, the SVM model has to be adjusted with lower cost, reducing the variance and increasing the bias - similar to an OLS model.
 
 ### Elastic Net
 Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
