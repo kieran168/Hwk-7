@@ -325,7 +325,8 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
     ## born.elsewhere         2.25   1.81                 2.76             7.43
     ## born.unknown          -1.84  -0.89                -2.17             2.78
 
-![](Lab7_files/figure-gfm/Random%20Forest-1.png)<!-- -->
+![](Lab7_files/figure-gfm/Random%20Forest-1.png)<!-- --> ![RF
+Plot](./RFPlot.png)
 
     ##     true
     ## pred     0     1
@@ -370,29 +371,20 @@ mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepF
 
 ![](Lab7_files/figure-gfm/Optimal%20Variable%20Code%20for%20Random%20Forest-1.png)<!-- -->
 
-``` r
-mtry
-```
-
     ##       mtry  OOBError
     ## 4.OOB    4 0.1383026
     ## 5.OOB    5 0.1366546
     ## 7.OOB    7 0.1374152
 
-``` r
-best.m <- mtry[mtry[, 2] == min(mtry[, 2]), (1:2)]
-print(best.m)
-```
-
     ##      mtry  OOBError 
     ## 5.0000000 0.1366546
 
 The optimal mtry number is 5, which in concert with a smaller number of
-trees reduced the Out of Box error rate from 13.77% to 13.6654624%. This
-rate tells us that as the model makes the splits and performs prediction
+trees reduced the Out of Box error rate from 13.77% to 13.67%. This rate
+tells us that as the model makes the splits and performs prediction
 tests on internally designated training and test data, it makes errors
-at a rate of 13.6654624%, performing slightly better than when the model
-is applied to the overall test data.
+at a rate of 13.67%, performing slightly better than when the model is
+applied to the overall test data.
 
 Note that the estimation prints out a Confusion Matrix first but that’s
 within the training data; the later one calculates how well it does on

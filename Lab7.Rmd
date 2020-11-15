@@ -156,6 +156,9 @@ print(model_randFor)
 round(importance(model_randFor),2)
 varImpPlot(model_randFor)
 # look at confusion matrix for this too
+```
+![RF Plot](./RFPlot.png)
+```{r}
 pred_model1 <- predict(model_randFor,  s_dat_test)
 RFpredtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
 RFpredtable
@@ -181,12 +184,14 @@ Here is some code to tune the Random Forest for mtry (the number of variables us
 
 ```{r Optimal Variable Code for Random Forest, echo=TRUE}
 mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 1.5, improve = 0.05, trace = TRUE, plot = TRUE)
+```
+```{r}
 mtry
 best.m <- mtry[mtry[, 2] == min(mtry[, 2]), (1:2)]
 print(best.m)
 ```
 
-The optimal mtry number is 5, which in concert with a smaller number of trees reduced the Out of Box error rate from 13.77% to `r (best.m[2])*100`%. This rate tells us that as the model makes the splits and performs prediction tests on internally designated training and test data, it makes errors at a rate of `r (best.m[2])*100`%, performing slightly better than when the model is applied to the overall test data. 
+The optimal mtry number is 5, which in concert with a smaller number of trees reduced the Out of Box error rate from 13.77% to `r round((best.m[2])*100, digits = 2)`%. This rate tells us that as the model makes the splits and performs prediction tests on internally designated training and test data, it makes errors at a rate of `r round((best.m[2])*100, digits = 2)`%, performing slightly better than when the model is applied to the overall test data. 
 
 
 Note that the estimation prints out a Confusion Matrix first but that's within the training data; the later one calculates how well it does on the test data.
