@@ -34,12 +34,6 @@ kables(list(kable(t1, align = "l", col.names = c("Coverage", "Total")), kable(t2
 
 Approximately `r round((prop.table(covtable)[1])*100, digits = 0)`% of respondents have health insurance coverage. 
 
-```{r Question 2 Subgroups and Logit, eval=FALSE, include=FALSE}
-#First decide on how you're defining your subgroup (all adults? Within certain age? Other?) then find some basic statistics -- what fraction are not covered? (Later go back to look at simple stats for subgroups to see if there are sharp differences.)
-
-#Run a logit regression. An example is below. 
-```
-
 Here are the logit regression results from the amended subset - Age $\ge 17$, $\le 75$.
 ```{r 1st Logit}
 model_logit1 <- glm(NOTCOV ~ AGE_P + I(AGE_P^2) + female + AfAm + Asian + RaceOther  
@@ -55,7 +49,7 @@ As we implement the other machine learning prediction models and interpret their
 
 ```{r Factor Recode for data.frame}
 d_region <- data.frame(model.matrix(~ dat2$REGION))
-d_region_born <- data.frame(model.matrix(~ factor(dat2$region_born)))  # snips any with zero in the subgroup
+d_region_born <- data.frame(model.matrix(~ factor(dat2$region_born)))
 dat_for_analysis_sub <- data.frame(
   dat2$NOTCOV,
   dat2$AGE_P,
@@ -104,13 +98,13 @@ names(dat_for_analysis_sub) <- c("NOTCOV",
                                  "born.elsewhere",
                                  "born.unknown")
 ```
-We've utilized the provided data.frame and standarizing code to standardize the variables and create our training and test sets. The training set is comprised of 75% of the observations.    
+We've utilized the provided data.frame and standarizing code to standardize the variables and create our training and test sets. The training set is comprised of 20% of the observations.    
 ```{r Standardize for Sobj, include=FALSE}
 require("standardize")
 set.seed(654321)
 NN <- length(dat_for_analysis_sub$NOTCOV)
 NN
-restrict_1 <- as.logical(runif(NN) < 0.75) # use fraction as training data
+restrict_1 <- as.logical(runif(NN) < 0.20) # use fraction as training data
 # summary(restrict_1)
 dat_train <- subset(dat_for_analysis_sub, restrict_1)
 dat_test <- subset(dat_for_analysis_sub, !restrict_1)
@@ -153,32 +147,32 @@ The logit regression is more straightforward, as we would expect the probabiliti
 
 Changing the predvals parameter to > 0.45 increases the accuracy of both models, by 0.3% and 0.11% for the OLS and Logit models respectively. The increases are negligible. Leaving the Logit predvals value at > 0.5 makes more sense as 0.5 is a probability value in this model. Setting it to a value below 0.5 would skew the correct prediction rate of whether the dependent variable is equal to 1. The prediction rate of the OLS and Logit models are `r round(goodolspred*100, digits = 2)`% and `r round(goodlogpred*100, digits = 2)`% respectively.
 
-### Random Forest
-Here is code for a Random Forest, which takes a bit of computing,
-```{r Random Forest, eval=FALSE}
-# install.packages("randomForest")
+### Random Forest Model
+```{r Random Forest}
 require('randomForest')
 set.seed(54321)
-model_randFor <- randomForest(as.factor(NOTCOV) ~ ., data = sobj$data, importance=TRUE, proximity=TRUE, ntree=100, mtry=5)
+model_randFor <- randomForest(as.factor(NOTCOV) ~ ., data = sobj$data, importance=TRUE, proximity=TRUE)
 print(model_randFor)
 round(importance(model_randFor),2)
 varImpPlot(model_randFor)
 # look at confusion matrix for this too
 pred_model1 <- predict(model_randFor,  s_dat_test)
-predtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
-predtable
+RFpredtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
+RFpredtable
 ```
-```{r Proportions of Correct Prediction, eval=FALSE}
-proppred <- prop.table(predtable)
-proppred
+```{r Proportions of Correct Prediction}
+proppred <- prop.table(RFpredtable)
+# proppred
 goodpred <- sum((proppred[1,1])+(proppred[2,2]))
-goodpred
+# goodpred
 falsepos <- proppred[2,1]
 falseneg <- proppred[1,2]
-falsepos
-falseneg
-round(goodpred*100, digits = 2)
+# falsepos
+# falseneg
+# round(goodpred*100, digits = 2)
 ```
+Our Random Forest model gives us a correct prediction rate within the test data of `r round(goodpred*100, digits = 2)`% but it also gives us some clearer insight into the variables that are important to the accuracy of the model. We can see from both the Mean Accuracy Decrease and the Mean Gini Decrease that age, the education variables and the race variables are important to the accuracy of the model. Interestingly enough, region of birth is unimportant to the accuracy of this model - the two birth regions, Sth America and Mexico, Central America and the Caribbean with the highest importance link to the race variable with the highest importance, i.e. Hispanic. The Hispanic variable has a large impacting on predicting that an observation *does not* have health coverage.
+
 
 ```{r Optimal Variable Code for Random Forest, eval=FALSE}
 mtry <- tuneRF(sobj$data[-1], as.factor(sobj$data$NOTCOV), ntreeTry = 100, stepFactor = 2, improve = 0.5, trace = TRUE, plot = TRUE)

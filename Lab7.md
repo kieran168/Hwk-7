@@ -135,7 +135,7 @@ p. 357)](https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf).
 
 We’ve utilized the provided data.frame and standarizing code to
 standardize the variables and create our training and test sets. The
-training set is comprised of 75% of the observations.
+training set is comprised of 20% of the observations.
 
 #### OLS
 
@@ -145,50 +145,50 @@ training set is comprised of 75% of the observations.
     ## 
     ## Residuals:
     ##      Min       1Q   Median       3Q      Max 
-    ## -0.64347 -0.17562 -0.09177 -0.00847  1.06728 
+    ## -0.63871 -0.17152 -0.08945 -0.00404  1.03573 
     ## 
     ## Coefficients:
-    ##                         Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)             0.457555   0.032292  14.169  < 2e-16 ***
-    ## Age                    -0.040676   0.001660 -24.496  < 2e-16 ***
-    ## female1                -0.014050   0.001391 -10.100  < 2e-16 ***
-    ## AfAm1                  -0.012040   0.002124  -5.668 1.45e-08 ***
-    ## Asian1                 -0.017047   0.004504  -3.785 0.000154 ***
-    ## RaceOther1              0.036836   0.005204   7.079 1.47e-12 ***
-    ## Hispanic1               0.021955   0.002451   8.958  < 2e-16 ***
-    ## educ_hs1               -0.006280   0.002218  -2.832 0.004632 ** 
-    ## educ_smcoll1           -0.032028   0.002401 -13.339  < 2e-16 ***
-    ## educ_as1               -0.031766   0.002796 -11.362  < 2e-16 ***
-    ## educ_bach1             -0.058236   0.002496 -23.329  < 2e-16 ***
-    ## educ_adv1              -0.066090   0.002936 -22.510  < 2e-16 ***
-    ## married1               -0.026369   0.001787 -14.754  < 2e-16 ***
-    ## widowed1               -0.019298   0.004518  -4.271 1.95e-05 ***
-    ## divorc_sep1             0.003838   0.002621   1.464 0.143073    
-    ## Region.Midwest1         0.013818   0.002308   5.987 2.15e-09 ***
-    ## Region.South1           0.035328   0.002081  16.975  < 2e-16 ***
-    ## Region.West1            0.012189   0.002176   5.602 2.13e-08 ***
-    ## born.Mex.CentAm.Carib1  0.114031   0.002972  38.369  < 2e-16 ***
-    ## born.S.Am1              0.064050   0.006712   9.542  < 2e-16 ***
-    ## born.Eur1               0.015393   0.005745   2.679 0.007376 ** 
-    ## born.f.USSR1            0.046016   0.013322   3.454 0.000552 ***
-    ## born.Africa1            0.053062   0.007755   6.843 7.85e-12 ***
-    ## born.MidE1              0.014229   0.010581   1.345 0.178682    
-    ## born.India.subc1        0.041993   0.007429   5.653 1.59e-08 ***
-    ## born.Asia1              0.047528   0.007167   6.631 3.35e-11 ***
-    ## born.SE.Asia1           0.028574   0.006203   4.606 4.10e-06 ***
-    ## born.elsewhere1         0.013040   0.009681   1.347 0.178008    
-    ## born.unknown1           0.002700   0.012735   0.212 0.832101    
+    ##                          Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)             0.3943589  0.0619257   6.368 1.96e-10 ***
+    ## Age                    -0.0401233  0.0031881 -12.585  < 2e-16 ***
+    ## female1                -0.0122144  0.0026681  -4.578 4.73e-06 ***
+    ## AfAm1                  -0.0164170  0.0040827  -4.021 5.82e-05 ***
+    ## Asian1                 -0.0143641  0.0083606  -1.718 0.085802 .  
+    ## RaceOther1              0.0373773  0.0097603   3.830 0.000129 ***
+    ## Hispanic1               0.0193867  0.0047109   4.115 3.89e-05 ***
+    ## educ_hs1               -0.0005653  0.0043125  -0.131 0.895717    
+    ## educ_smcoll1           -0.0310521  0.0046546  -6.671 2.62e-11 ***
+    ## educ_as1               -0.0274274  0.0053142  -5.161 2.48e-07 ***
+    ## educ_bach1             -0.0533572  0.0048056 -11.103  < 2e-16 ***
+    ## educ_adv1              -0.0671569  0.0056160 -11.958  < 2e-16 ***
+    ## married1               -0.0265638  0.0034426  -7.716 1.27e-14 ***
+    ## widowed1               -0.0215873  0.0088095  -2.450 0.014278 *  
+    ## divorc_sep1             0.0016613  0.0050733   0.327 0.743326    
+    ## Region.Midwest1         0.0168660  0.0044298   3.807 0.000141 ***
+    ## Region.South1           0.0380560  0.0039923   9.532  < 2e-16 ***
+    ## Region.West1            0.0126649  0.0041635   3.042 0.002355 ** 
+    ## born.Mex.CentAm.Carib1  0.1206322  0.0057188  21.094  < 2e-16 ***
+    ## born.S.Am1              0.0724097  0.0133533   5.423 5.96e-08 ***
+    ## born.Eur1               0.0075462  0.0114026   0.662 0.508110    
+    ## born.f.USSR1            0.0028652  0.0256390   0.112 0.911021    
+    ## born.Africa1            0.0686910  0.0143355   4.792 1.67e-06 ***
+    ## born.MidE1             -0.0072496  0.0207780  -0.349 0.727165    
+    ## born.India.subc1        0.0417634  0.0144345   2.893 0.003817 ** 
+    ## born.Asia1              0.0514502  0.0135720   3.791 0.000151 ***
+    ## born.SE.Asia1           0.0278490  0.0118692   2.346 0.018972 *  
+    ## born.elsewhere1         0.0179289  0.0165713   1.082 0.279303    
+    ## born.unknown1          -0.0286173  0.0251313  -1.139 0.254841    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.3357 on 59598 degrees of freedom
-    ## Multiple R-squared:  0.1297, Adjusted R-squared:  0.1293 
-    ## F-statistic: 317.3 on 28 and 59598 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 0.331 on 15748 degrees of freedom
+    ## Multiple R-squared:  0.1371, Adjusted R-squared:  0.1356 
+    ## F-statistic: 89.35 on 28 and 15748 DF,  p-value: < 2.2e-16
 
     ##        true
     ## pred        0     1
-    ##   FALSE 16542  2660
-    ##   TRUE    285   458
+    ##   FALSE 52942  8355
+    ##   TRUE    974  1524
 
 #### Logit
 
@@ -198,54 +198,54 @@ training set is comprised of 75% of the observations.
     ## 
     ## Deviance Residuals: 
     ##     Min       1Q   Median       3Q      Max  
-    ## -1.8479  -0.5807  -0.4028  -0.2500   2.9873  
+    ## -1.8296  -0.5692  -0.3931  -0.2330   3.0235  
     ## 
     ## Coefficients:
     ##                        Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)             0.52586    0.28955   1.816 0.069347 .  
-    ## Age                    -0.37604    0.01562 -24.069  < 2e-16 ***
-    ## female1                -0.11855    0.01241  -9.554  < 2e-16 ***
-    ## AfAm1                  -0.06342    0.01877  -3.379 0.000728 ***
-    ## Asian1                 -0.12145    0.04241  -2.864 0.004186 ** 
-    ## RaceOther1              0.24811    0.03831   6.476 9.41e-11 ***
-    ## Hispanic1               0.15787    0.01950   8.097 5.65e-16 ***
-    ## educ_hs1               -0.01242    0.01656  -0.750 0.453237    
-    ## educ_smcoll1           -0.21762    0.01918 -11.345  < 2e-16 ***
-    ## educ_as1               -0.21793    0.02399  -9.086  < 2e-16 ***
-    ## educ_bach1             -0.57293    0.02476 -23.139  < 2e-16 ***
-    ## educ_adv1              -0.87361    0.04078 -21.421  < 2e-16 ***
-    ## married1               -0.21032    0.01567 -13.418  < 2e-16 ***
-    ## widowed1               -0.17073    0.04856  -3.516 0.000438 ***
-    ## divorc_sep1             0.07916    0.02227   3.554 0.000379 ***
-    ## Region.Midwest1         0.14460    0.02309   6.264 3.76e-10 ***
-    ## Region.South1           0.33499    0.01998  16.769  < 2e-16 ***
-    ## Region.West1            0.14045    0.02110   6.657 2.80e-11 ***
-    ## born.Mex.CentAm.Carib1  0.65762    0.02152  30.562  < 2e-16 ***
-    ## born.S.Am1              0.52652    0.04881  10.787  < 2e-16 ***
-    ## born.Eur1               0.16952    0.05743   2.952 0.003158 ** 
-    ## born.f.USSR1            0.44475    0.11830   3.759 0.000170 ***
-    ## born.Africa1            0.46611    0.06236   7.474 7.76e-14 ***
-    ## born.MidE1              0.17140    0.10424   1.644 0.100121    
-    ## born.India.subc1        0.46334    0.07035   6.587 4.50e-11 ***
-    ## born.Asia1              0.47606    0.06476   7.351 1.97e-13 ***
-    ## born.SE.Asia1           0.25315    0.05979   4.234 2.30e-05 ***
-    ## born.elsewhere1         0.14647    0.09361   1.565 0.117686    
-    ## born.unknown1           0.07727    0.10869   0.711 0.477121    
+    ## (Intercept)            -0.35139    0.63245  -0.556 0.578479    
+    ## Age                    -0.38256    0.03095 -12.360  < 2e-16 ***
+    ## female1                -0.10541    0.02452  -4.299 1.72e-05 ***
+    ## AfAm1                  -0.10481    0.03778  -2.774 0.005536 ** 
+    ## Asian1                 -0.11644    0.08281  -1.406 0.159670    
+    ## RaceOther1              0.24634    0.07390   3.333 0.000858 ***
+    ## Hispanic1               0.13799    0.03873   3.563 0.000367 ***
+    ## educ_hs1                0.02991    0.03302   0.906 0.364970    
+    ## educ_smcoll1           -0.21925    0.03847  -5.699 1.20e-08 ***
+    ## educ_as1               -0.18446    0.04666  -3.953 7.70e-05 ***
+    ## educ_bach1             -0.53480    0.04838 -11.054  < 2e-16 ***
+    ## educ_adv1              -1.02187    0.08923 -11.452  < 2e-16 ***
+    ## married1               -0.21826    0.03112  -7.014 2.31e-12 ***
+    ## widowed1               -0.21749    0.09959  -2.184 0.028979 *  
+    ## divorc_sep1             0.05821    0.04455   1.307 0.191343    
+    ## Region.Midwest1         0.18493    0.04625   3.998 6.39e-05 ***
+    ## Region.South1           0.37907    0.04027   9.412  < 2e-16 ***
+    ## Region.West1            0.16201    0.04238   3.823 0.000132 ***
+    ## born.Mex.CentAm.Carib1  0.71326    0.04275  16.683  < 2e-16 ***
+    ## born.S.Am1              0.60564    0.09786   6.189 6.06e-10 ***
+    ## born.Eur1               0.06948    0.12620   0.551 0.581951    
+    ## born.f.USSR1           -0.01891    0.27934  -0.068 0.946037    
+    ## born.Africa1            0.59365    0.11398   5.208 1.91e-07 ***
+    ## born.MidE1             -0.11569    0.26435  -0.438 0.661657    
+    ## born.India.subc1        0.52396    0.14141   3.705 0.000211 ***
+    ## born.Asia1              0.54277    0.12586   4.313 1.61e-05 ***
+    ## born.SE.Asia1           0.26818    0.11818   2.269 0.023258 *  
+    ## born.elsewhere1         0.21471    0.15749   1.363 0.172779    
+    ## born.unknown1          -0.24651    0.27101  -0.910 0.363033    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## (Dispersion parameter for binomial family taken to be 1)
     ## 
-    ##     Null deviance: 50985  on 59626  degrees of freedom
-    ## Residual deviance: 43533  on 59598  degrees of freedom
-    ## AIC: 43591
+    ##     Null deviance: 13281  on 15776  degrees of freedom
+    ## Residual deviance: 11193  on 15748  degrees of freedom
+    ## AIC: 11251
     ## 
     ## Number of Fisher Scoring iterations: 6
 
     ##        true
     ## pred        0     1
-    ##   FALSE 16571  2700
-    ##   TRUE    256   418
+    ##   FALSE 53024  8454
+    ##   TRUE    892  1425
 
 Given the standardized variables, we can compare the OLS and Logit
 regressions. While the values of each coefficient vary, the sign for
@@ -270,11 +270,79 @@ respectively. The increases are negligible. Leaving the Logit predvals
 value at \> 0.5 makes more sense as 0.5 is a probability value in this
 model. Setting it to a value below 0.5 would skew the correct prediction
 rate of whether the dependent variable is equal to 1. The prediction
-rate of the OLS and Logit models are 85.23% and 85.18% respectively.
+rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
-### Random Forest
+### Random Forest Model
 
-Here is code for a Random Forest, which takes a bit of computing,
+    ## Loading required package: randomForest
+
+    ## Warning: package 'randomForest' was built under R version 4.0.3
+
+    ## randomForest 4.6-14
+
+    ## Type rfNews() to see new features/changes/bug fixes.
+
+    ## 
+    ## Call:
+    ##  randomForest(formula = as.factor(NOTCOV) ~ ., data = sobj$data,      importance = TRUE, proximity = TRUE) 
+    ##                Type of random forest: classification
+    ##                      Number of trees: 500
+    ## No. of variables tried at each split: 5
+    ## 
+    ##         OOB estimate of  error rate: 13.77%
+    ## Confusion matrix:
+    ##       0   1 class.error
+    ## 0 13207 220   0.0163849
+    ## 1  1952 398   0.8306383
+
+    ##                           0      1 MeanDecreaseAccuracy MeanDecreaseGini
+    ## Age                   37.76  41.85                52.82           335.30
+    ## female                 5.57   7.51                 8.85            36.76
+    ## AfAm                   0.47  21.61                16.04            26.19
+    ## Asian                  9.58   1.69                11.19            14.46
+    ## RaceOther              5.90   8.32                 9.75            19.79
+    ## Hispanic              -9.81  31.35                36.33           123.57
+    ## educ_hs               17.99  -9.37                14.97            33.46
+    ## educ_smcoll           13.63  14.93                22.66            29.61
+    ## educ_as               14.35  11.69                19.96            21.13
+    ## educ_bach             20.35  26.99                33.81            43.40
+    ## educ_adv              25.42  27.85                36.67            40.04
+    ## married               28.37 -16.28                27.19            52.56
+    ## widowed                5.99   0.61                 6.61             9.90
+    ## divorc_sep             8.74  -2.07                 7.25            20.14
+    ## Region.Midwest         0.73   7.99                 7.03            18.81
+    ## Region.South           4.47  17.84                19.03            37.55
+    ## Region.West           -2.24  10.65                 8.65            24.74
+    ## born.Mex.CentAm.Carib -1.70  61.87                48.10           201.37
+    ## born.S.Am              6.60  12.33                13.10            13.77
+    ## born.Eur               2.27  -2.56                 1.05             7.80
+    ## born.f.USSR           -5.49  -4.43                -6.35             2.56
+    ## born.Africa           -1.78   5.20                -0.03            10.47
+    ## born.MidE             -4.93  -1.39                -5.12             2.69
+    ## born.India.subc       13.10   1.79                14.34             8.60
+    ## born.Asia              2.24   1.32                 2.77             9.81
+    ## born.SE.Asia           9.40  -2.38                 9.19             8.69
+    ## born.elsewhere         2.25   1.81                 2.76             7.43
+    ## born.unknown          -1.84  -0.89                -2.17             2.78
+
+![](Lab7_files/figure-gfm/Random%20Forest-1.png)<!-- -->
+
+    ##     true
+    ## pred     0     1
+    ##    0 52996  8269
+    ##    1   920  1610
+
+Our Random Forest model gives us a correct prediction rate within the
+test data of 85.6% but it also gives us some clearer insight into the
+variables that are important to the accuracy of the model. We can see
+from both the Mean Accuracy Decrease and the Mean Gini Decrease that
+age, the education variables and the race variables are important to the
+accuracy of the model. Interestingly enough, region of birth is
+unimportant to the accuracy of this model - the two birth regions, Sth
+America and Mexico, Central America and the Caribbean with the highest
+importance link to the race variable with the highest importance,
+i.e. Hispanic. The Hispanic variable has a large impacting on
+predicting that an observation *does not* have health coverage.
 
 Note that the estimation prints out a Confusion Matrix first but that’s
 within the training data; the later one calculates how well it does on
