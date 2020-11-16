@@ -280,6 +280,8 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
+    ## Warning: package 'randomForest' was built under R version 4.0.3
+
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -392,6 +394,8 @@ applied to the overall test data.
 
     ## Loading required package: e1071
 
+    ## Warning: package 'e1071' was built under R version 4.0.3
+
     ##     true
     ## pred     0     1
     ##    0 52412  7986
@@ -428,8 +432,8 @@ increasing the bias - similar to an OLS model.
 
 Changing the gamma value in the model adjusts the flexibility of the
 separating plane. We removed the gamma value from the model and saw that
-while our True Negative prediction rate increased by 0.74%, our True
-Positive rate decreased by 0.22%. The trade off of these change in
+while our False Positive prediction rate decreased by 7.25%, our False
+Negative rate increased by 0.09%. The trade off of these change in
 predictions depends on the context of the person asking the questions of
 the model. For a policy maker, correctly identifying those who lack
 healthcare coverage is important. Misallocating resources to provide
@@ -774,12 +778,14 @@ probabilities, tend towards not having health insurance.
     ## Fair          4.51   1.58                 5.23            11.47
     ## Poor          1.61   4.54                 3.94             6.00
 
-![](Lab7_files/figure-gfm/Random%20Forest%202-1.png)<!-- -->
-
-    ##     true
-    ## pred     0     1
-    ##    0 53584  9312
-    ##    1   332   567
+![](Lab7_files/figure-gfm/Random%20Forest%202-1.png)<!-- --> Our second
+random forest model has a large increase in the false positive rate. It
+jumps from 83.06% to 94.68%. Again, the relevance of this increase
+depends on the context of the researcher. Pharmaceutical sales companies
+developing new drugs would be concerned with such an increase in false
+positives. Their sales and marketing teams would miss product placement
+opportunities amongst demographics that were falsely predicted to have
+low rates of health coverage.
 
 #### SVM 2
 
@@ -792,8 +798,14 @@ probabilities, tend towards not having health insurance.
     ## pred          0          1
     ##    0 0.82892076 0.13512031
     ##    1 0.01622384 0.01973509
+    ## [1] 0.8486559
 
-#### Regularization Regression 2: Results comparison
+The second SVM model has a decrease in correct prediction rate of 0.26%.
+This is a smaller change than the difference in correct prediction rates
+of the Random Forest models (0.71%)
+
+
+#### Results Comparison 2: Regularization Regression
 
 So after dropping some of the explanatory variables that were deemed to
 be less important to the model by the Variable Important Plots and
@@ -842,6 +854,8 @@ rates would be a “bad” problem from an insurance or
     ## [1] 0.5873188
 
     ## [1] 0.5880398
+
+### Summary
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
