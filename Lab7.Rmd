@@ -162,6 +162,7 @@ varImpPlot(model_randFor)
 pred_model1 <- predict(model_randFor,  s_dat_test)
 RFpredtable <- table(pred = pred_model1, true = dat_test$NOTCOV)
 RFpredtable
+#print(sum(diag(RFpredtable))/sum(RFpredtable))
 ```
 ```{r Proportions of Correct Prediction}
 RFproppred <- prop.table(RFpredtable)
@@ -227,7 +228,7 @@ Running the SVM as given produces a correct prediction rate of `r round(SVMgoodp
 
 If we are comfortable with the data set at hand and seek strong predictive power, we can set our cost high, increasing the variance and lowering the bias of the model - similar to a logistic model. If we wish to look at multiple data-sets, to assess correlation and causality, the SVM model has to be adjusted with lower cost, reducing the variance and increasing the bias - similar to an OLS model.
 
-Changing the gamma value in the model adjusts the flexibility of the separating plane. We removed the gamma value from the model and saw that while our True Negative prediction rate increased by 0.74%, our True Positive rate decreased by 0.22%. The trade off of these change in predictions depends on the context of the person asking the questions of the model. For a policy maker, correctly identifying those who lack healthcare coverage is important. Misallocating resources to provide health services to demographics that already have good access to those service is a waste of critical government infrastructure and revenues. For a health insurance company, the tolerance of misclassification may be higher. A person who was predicted to not have coverage can still be pitched with other health insurance products if they already have some sort of coverage.
+Changing the gamma value in the model adjusts the flexibility of the separating plane. We removed the gamma value from the model and saw that while our False Positive prediction rate decreased by 7.25%, our False Negative rate increased by 0.09%. The trade off of these change in predictions depends on the context of the person asking the questions of the model. For a policy maker, correctly identifying those who lack healthcare coverage is important. Misallocating resources to provide health services to demographics that already have good access to those service is a waste of critical government infrastructure and revenues. For a health insurance company, the tolerance of misclassification may be higher. A person who was predicted to not have coverage can still be pitched with other health insurance products if they already have some sort of coverage.
 
 ### Elastic Net
 We have run one model for each if the regularized regression models: Elastic Net, Ridge, and Lasso. We ran one for each to be able to see the difference between the three and also to see how each would fare in their final prediction results.
@@ -455,16 +456,18 @@ print(model_randFor2)
 round(importance(model_randFor2),2)
 varImpPlot(model_randFor2)
 ```
-```{r RFPred 2}
+Our second random forest model has a large increase in the false positive rate. It jumps from 83.06% to 94.68%. Again, the relevance of this increase depends on the context of the researcher. Pharmaceutical sales companies developing new drugs would be concerned with such an increase in false positives. Their sales and marketing teams would miss product placement opportunities amongst demographics that were falsely predicted to have low rates of health coverage.
+```{r RFPred 2, include = FALSE}
 pred_model2 <- predict(model_randFor2,  s_dat_test2)
 RFpredtable2 <- table(pred = pred_model2, true = dat_test2$NOTCOV)
 RFpredtable2
 ```
-```{r Proportions of Correct Prediction 2}
+
+```{r Proportions of Correct Prediction 2, include = FALSE}
 RFproppred2 <- prop.table(RFpredtable2)
 # proppred
 RFgoodpred2 <- sum((RFproppred2[1,1])+(RFproppred2[2,2]))
-# goodpred
+RFgoodpred2
 RFfalsepos2 <- RFproppred2[2,1]
 RFfalseneg2 <- RFproppred2[1,2]
 ```
@@ -481,7 +484,13 @@ SVM2predtable
 SVM2proppred <- prop.table(SVM2predtable)
 SVM2proppred
 SVM2goodpred <- sum((SVM2proppred[1,1])+(SVM2proppred[2,2]))
+SVM2goodpred
+# round(sum(SVMgoodpred-SVM2goodpred)*100, digits = 2)
+# round(sum(RFgoodpred-RFgoodpred2)*100, digits = 2)
 ```
+The second SVM model has a decrease in correct prediction rate of `r round(sum(SVMgoodpred-SVM2goodpred)*100, digits = 2)`%. This is a smaller change than the difference in correct prediction rates of the Random Forest models (`r round(sum(RFgoodpred-RFgoodpred2)*100, digits = 2)`%)
+
+### Summary
 When you summarize, you should be able to explain which models predict best (noting if there is a tradeoff of false positive vs false negative) and if there are certain explanatory variables that are consistently more or less useful. Also try other lists of explanatory variables.
 
 

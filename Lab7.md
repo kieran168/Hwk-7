@@ -394,6 +394,8 @@ applied to the overall test data.
 
     ## Loading required package: e1071
 
+    ## Warning: package 'e1071' was built under R version 4.0.3
+
     ##     true
     ## pred     0     1
     ##    0 52412  7986
@@ -430,8 +432,8 @@ increasing the bias - similar to an OLS model.
 
 Changing the gamma value in the model adjusts the flexibility of the
 separating plane. We removed the gamma value from the model and saw that
-while our True Negative prediction rate increased by 0.74%, our True
-Positive rate decreased by 0.22%. The trade off of these change in
+while our False Positive prediction rate decreased by 7.25%, our False
+Negative rate increased by 0.09%. The trade off of these change in
 predictions depends on the context of the person asking the questions of
 the model. For a policy maker, correctly identifying those who lack
 healthcare coverage is important. Misallocating resources to provide
@@ -478,7 +480,6 @@ This is similar to the Random Forest model that tells us which
 explanatory variables are of most importance. This process is The
 explanatory variables that are not shrunk toward zero signify that they
 are important to
-
 
 ### Other Explanatory Variables
 
@@ -627,12 +628,14 @@ probabilities, tend towards not having health insurance.
     ## Fair          4.51   1.58                 5.23            11.47
     ## Poor          1.61   4.54                 3.94             6.00
 
-![](Lab7_files/figure-gfm/Random%20Forest%202-1.png)<!-- -->
-
-    ##     true
-    ## pred     0     1
-    ##    0 53584  9312
-    ##    1   332   567
+![](Lab7_files/figure-gfm/Random%20Forest%202-1.png)<!-- --> Our second
+random forest model has a large increase in the false positive rate. It
+jumps from 83.06% to 94.68%. Again, the relevance of this increase
+depends on the context of the researcher. Pharmaceutical sales companies
+developing new drugs would be concerned with such an increase in false
+positives. Their sales and marketing teams would miss product placement
+opportunities amongst demographics that were falsely predicted to have
+low rates of health coverage.
 
 #### SVM 2
 
@@ -646,6 +649,13 @@ probabilities, tend towards not having health insurance.
     ##    0 0.82892076 0.13512031
     ##    1 0.01622384 0.01973509
 
+    ## [1] 0.8486559
+
+The second SVM model has a decrease in correct prediction rate of 0.26%.
+This is a smaller change than the difference in correct prediction rates
+of the Random Forest models (0.71%)
+
+### Summary
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
