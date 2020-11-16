@@ -135,7 +135,11 @@ p. 357)](https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf).
 
 We’ve utilized the provided data.frame and standarizing code to
 standardize the variables and create our training and test sets. The
-training set is comprised of 20% of the observations.
+training set is comprised of 20% of the observations. We noticed that
+creating factors of REGION and region\_born excluded Northeast and [Born
+in the US](https://www.youtube.com/watch?v=EPhWR4d3FJQ), which will
+influence the results the models produce. This may be an important
+factor for the researcher querying the dataset to consider.
 
 #### OLS
 
@@ -276,6 +280,8 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
+    ## Warning: package 'randomForest' was built under R version 4.0.3
+
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -400,6 +406,8 @@ applied to the overall test data.
     ##    0 0.82156909 0.12518222
     ##    1 0.02357552 0.02967317
 
+    ## [1] 0.8512423
+
 Running the SVM as given produces a correct prediction rate of 85.12%.
 We can change the SVM model by adjusted the cost and gamma parameters.
 The cost parameter determines the tolerance the model has to violations
@@ -436,42 +444,173 @@ be higher. A person who was predicted to not have coverage can still be
 pitched with other health insurance products if they already have some
 sort of coverage.
 
-    ## Loading required package: e1071
+### Elastic Net
+
+### Other Explanatory Variables
+
+Based on the results from the previous Random Forest, SVM and Lasso
+models, we noticed that REGION and region\_born were consistently
+unimportant to the models. Age, education, gender and marriage variables
+were all important, across all models. To test how these models would
+handle other variables, we removed REGION, region\_born and the marriage
+variables. We created a factor from the person\_healthstatus
+observations and included them in a new subset to test. We noticed that
+the factor excluded observations that had been coded “Excellent”, which
+will influence how the models make the comparisons between the
+observations.
+
+    ## [1] 79572
+
+#### OLS 2
+
+    ## 
+    ## Call:
+    ## lm(formula = sobj2$formula, data = sobj2$data)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.52383 -0.17547 -0.09373 -0.01417  1.04528 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   0.057517   0.022554   2.550   0.0108 *  
+    ## Age          -0.045734   0.002857 -16.008  < 2e-16 ***
+    ## female1      -0.012388   0.002692  -4.602 4.22e-06 ***
+    ## AfAm1         0.001419   0.003971   0.357   0.7209    
+    ## Asian1        0.003446   0.005337   0.646   0.5184    
+    ## RaceOther1    0.039184   0.009846   3.980 6.94e-05 ***
+    ## Hispanic1     0.079525   0.003620  21.970  < 2e-16 ***
+    ## educ_hs1     -0.018230   0.004310  -4.230 2.35e-05 ***
+    ## educ_smcoll1 -0.050649   0.004641 -10.914  < 2e-16 ***
+    ## educ_as1     -0.048079   0.005324  -9.031  < 2e-16 ***
+    ## educ_bach1   -0.071002   0.004857 -14.619  < 2e-16 ***
+    ## educ_adv1    -0.083047   0.005681 -14.619  < 2e-16 ***
+    ## Very_Good1    0.007574   0.003462   2.187   0.0287 *  
+    ## Good1         0.023991   0.003690   6.502 8.16e-11 ***
+    ## Fair1         0.011995   0.005238   2.290   0.0220 *  
+    ## Poor1        -0.015004   0.008644  -1.736   0.0826 .  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.3368 on 15761 degrees of freedom
+    ## Multiple R-squared:  0.1058, Adjusted R-squared:  0.105 
+    ## F-statistic: 124.3 on 15 and 15761 DF,  p-value: < 2.2e-16
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 53802  9760
+    ##   TRUE    114   119
+
+The estimates for Age, gender and education all have the same signs as
+they did in the initial OLS model. The health status coefficient
+estimates suggest that the variables of very good health and poor health
+correlate towards NOTCOV being zero. Intuition would suggest this is on
+the right track - those in very good health would have cheaper insurance
+premiums; those in poor health likely require health insurance to make
+sure all medical expenses can be covered.
+
+#### Logit 2
+
+    ## 
+    ## Call:
+    ## glm(formula = sobj2$formula, family = binomial, data = sobj2$data)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.4886  -0.5810  -0.4161  -0.2528   2.9855  
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept)  -3.05239    0.20039 -15.232  < 2e-16 ***
+    ## Age          -0.40968    0.02611 -15.691  < 2e-16 ***
+    ## female1      -0.10229    0.02384  -4.290 1.79e-05 ***
+    ## AfAm1         0.02965    0.03538   0.838 0.402016    
+    ## Asian1        0.06948    0.05137   1.353 0.176187    
+    ## RaceOther1    0.25207    0.07071   3.565 0.000364 ***
+    ## Hispanic1     0.51277    0.02671  19.195  < 2e-16 ***
+    ## educ_hs1     -0.08193    0.03133  -2.615 0.008926 ** 
+    ## educ_smcoll1 -0.33609    0.03674  -9.147  < 2e-16 ***
+    ## educ_as1     -0.31491    0.04501  -6.997 2.62e-12 ***
+    ## educ_bach1   -0.62559    0.04728 -13.230  < 2e-16 ***
+    ## educ_adv1    -1.07014    0.08776 -12.195  < 2e-16 ***
+    ## Very_Good1    0.07681    0.03210   2.393 0.016723 *  
+    ## Good1         0.21421    0.03195   6.705 2.01e-11 ***
+    ## Fair1         0.14093    0.04522   3.117 0.001829 ** 
+    ## Poor1        -0.10433    0.08779  -1.188 0.234647    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 13281  on 15776  degrees of freedom
+    ## Residual deviance: 11617  on 15761  degrees of freedom
+    ## AIC: 11649
+    ## 
+    ## Number of Fisher Scoring iterations: 6
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 53376  9478
+    ##   TRUE    540   401
+
+The results of the Logit model align with those from the OLS model. We
+see a similar pattern of probability of not having health coverage.
+Those with more education have a lower probability of not having health
+insurance coverage. Those with very good health and those in poor health
+also have a lower probability of not having health insurance. The health
+status variables in the middle, Good and Fair health, while still low
+probabilities, tend towards not having health insurance.
+
+#### Random Forest Model 2
+
+    ## 
+    ## Call:
+    ##  randomForest(formula = as.factor(NOTCOV) ~ ., data = sobj2$data,      importance = TRUE, proximity = TRUE) 
+    ##                Type of random forest: classification
+    ##                      Number of trees: 500
+    ## No. of variables tried at each split: 3
+    ## 
+    ##         OOB estimate of  error rate: 14.55%
+    ## Confusion matrix:
+    ##       0   1 class.error
+    ## 0 13356  71 0.005287853
+    ## 1  2225 125 0.946808511
+
+    ##                  0      1 MeanDecreaseAccuracy MeanDecreaseGini
+    ## Age          19.16  27.75                29.90           216.40
+    ## female        6.84  10.60                11.82            18.57
+    ## AfAm         -6.89  13.46                 5.78            13.46
+    ## Asian        -1.69   3.86                 1.20             8.43
+    ## RaceOther     0.95   8.46                 5.78            13.51
+    ## Hispanic    -15.94  32.34                32.80           185.94
+    ## educ_hs      20.80 -17.11                18.17            24.58
+    ## educ_smcoll  21.48   7.23                23.41            27.32
+    ## educ_as      16.71   1.64                16.99            16.56
+    ## educ_bach    16.14  22.43                22.76            46.30
+    ## educ_adv     11.32  22.87                18.74            44.92
+    ## Very_Good    -1.04   2.57                 1.16            10.51
+    ## Good          0.50   2.57                 3.12            18.42
+    ## Fair          4.51   1.58                 5.23            11.47
+    ## Poor          1.61   4.54                 3.94             6.00
+
+![](Lab7_files/figure-gfm/Random%20Forest%202-1.png)<!-- -->
+
+    ##     true
+    ## pred     0     1
+    ##    0 53584  9312
+    ##    1   332   567
+
+#### SVM 2
+
+    ##     true
+    ## pred     0     1
+    ##    0 52881  8620
+    ##    1  1035  1259
 
     ##     true
     ## pred          0          1
-    ##    0 0.82156909 0.12518222
-    ##    1 0.02357552 0.02967317
-
-    ## [1] 0.8512423
-
-Running the SVM as given produces a correct prediction rate of 85.12%.
-We can change the SVM model by adjusted the cost and gamma parameters.
-The cost parameter determines the tolerance the model has to violations
-of the margins of the separating plane; the higher the cost, the
-narrower the margin, which produces results with high variance but a
-lower bias. With higher variance, the model may give [different
-estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/)
-for the function of the separating plane when applied to different data
-sets. If we want to lower the variance to keep estimates produced by the
-model similar as we change data sets, we need to increase the bias - we
-have to accept that the model makes more assumptions about the form of
-the separating function. To keep estimates more consistent across
-different data sets, we have to accept that the model will lose
-predictive power.
-
-If we are comfortable with the data set at hand and seek strong
-predictive power, we can set our cost high, increasing the variance and
-lowering the bias of the model - similar to a logistic model. If we wish
-to look at multiple data-sets, to assess correlation and causality, the
-SVM model has to be adjusted with lower cost, reducing the variance and
-increasing the bias - similar to an OLS model.
-
-### Elastic Net
-
-Here is Elastic Net. It combines LASSO with Ridge and the alpha
-parameter (from 0 to 1) determines the relative weight. Begin with alpha
-= 1 so just LASSO.
+    ##    0 0.82892076 0.13512031
+    ##    1 0.01622384 0.01973509
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
@@ -484,6 +623,8 @@ more or less useful. Also try other lists of explanatory variables.
 
 <https://www.healthcare.gov/young-adults/children-under-26/>
 
+<https://bradleyboehmke.github.io/HOML/regularized-regression.html>
+
 Brownlee, Jason, (2016). “Support Vector Machines for Machine Learning”,
 <https://machinelearningmastery.com/support-vector-machines-for-machine-learning/>
 
@@ -491,3 +632,6 @@ James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani,
 (2017). “Introduction to Statistical Learning”, New York: Springer
 Science+Business Media,
 <https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf>
+
+Springsteen, Bruce, (1984) “Born In The USA”, *Born In The USA*,
+Columbia, <https://www.youtube.com/watch?v=EPhWR4d3FJQ>

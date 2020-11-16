@@ -98,7 +98,7 @@ names(dat_for_analysis_sub) <- c("NOTCOV",
                                  "born.elsewhere",
                                  "born.unknown")
 ```
-We've utilized the provided data.frame and standarizing code to standardize the variables and create our training and test sets. The training set is comprised of 20% of the observations.    
+We've utilized the provided data.frame and standarizing code to standardize the variables and create our training and test sets. The training set is comprised of 20% of the observations. We noticed that creating factors of REGION and region_born excluded Northeast and [Born in the US](https://www.youtube.com/watch?v=EPhWR4d3FJQ), which will influence the results the models produce. This may be an important factor for the researcher querying the dataset to consider.
 ```{r Standardize for Sobj, include=FALSE}
 require("standardize")
 set.seed(654321)
@@ -206,6 +206,7 @@ SVMpredtable
 SVMproppred <- prop.table(SVMpredtable)
 SVMproppred
 SVMgoodpred <- sum((SVMproppred[1,1])+(SVMproppred[2,2]))
+SVMgoodpred
 ```
 ```{r include=FALSE}
 svm.model2 <- svm(as.factor(NOTCOV) ~ ., data = sobj$data, cost = 10)
@@ -229,7 +230,6 @@ If we are comfortable with the data set at hand and seek strong predictive power
 Changing the gamma value in the model adjusts the flexibility of the separating plane. We removed the gamma value from the model and saw that while our True Negative prediction rate increased by 0.74%, our True Positive rate decreased by 0.22%. The trade off of these change in predictions depends on the context of the person asking the questions of the model. For a policy maker, correctly identifying those who lack healthcare coverage is important. Misallocating resources to provide health services to demographics that already have good access to those service is a waste of critical government infrastructure and revenues. For a health insurance company, the tolerance of misclassification may be higher. A person who was predicted to not have coverage can still be pitched with other health insurance products if they already have some sort of coverage.
 
 ### Elastic Net
-Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
 ```{r Elastic Net Regression, eval = FALSE}
 # Elastic Net
 # install.packages("glmnet")
@@ -334,6 +334,7 @@ cvmodel1_lasso = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOT
 cvmodel1_lasso$lambda.min
 log(cvmodel1_lasso$lambda.min)
 coef(cvmodel1_lasso, s = "lambda.min")
+vip(cvmodel1_lasso, num_features = 50, geom = "point")
 
 pred1_lasso <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_lasso$lambda.min)
 pred_model1_lasso <- (pred1_lasso < mean(pred1_lasso)) 
@@ -364,7 +365,113 @@ ElasticNetgoodpred
 Ridgegoodpred
 Lassogoodpred
 ```
+### Other Explanatory Variables
+Based on the results from the previous Random Forest, SVM and Lasso models, we noticed that REGION and region_born were consistently unimportant to the models. Age, education, gender and marriage variables were all important, across all models. To test how these models would handle other variables, we removed REGION, region_born and the marriage variables. We created a factor from the person_healthstatus observations and included them in a new subset to test. We noticed that the factor excluded observations that had been coded "Excellent", which will influence how the models make the comparisons between the observations.
+```{r HealthStat Varb}
+healthstat <- data.frame(model.matrix(~ dat2$person_healthstatus))
+dat_for_analysis2 <- data.frame(
+  dat2$NOTCOV,
+  dat2$AGE_P,
+  dat2$female,
+  dat2$AfAm,
+  dat2$Asian,
+  dat2$RaceOther,
+  dat2$Hispanic,
+  dat2$educ_hs,
+  dat2$educ_smcoll,
+  dat2$educ_as,
+  dat2$educ_bach,
+  dat2$educ_adv,
+  healthstat[,2:5])
+names(dat_for_analysis2) <- c("NOTCOV",
+                                 "Age",
+                                 "female",
+                                 "AfAm",
+                                 "Asian",
+                                 "RaceOther",
+                                 "Hispanic",
+                                 "educ_hs",
+                                 "educ_smcoll",
+                                 "educ_as",
+                                 "educ_bach",
+                                 "educ_adv",
+                                 "Very_Good",
+                                 "Good",
+                                 "Fair", "Poor")
+```
+```{r Train Set}
+set.seed(654321)
+NN2 <- length(dat_for_analysis2$NOTCOV)
+NN2
+restrict_2 <- as.logical(runif(NN2) < 0.20)
+dat_train2 <- subset(dat_for_analysis2, restrict_2)
+dat_test2 <- subset(dat_for_analysis2, !restrict_2)
+sobj2 <- standardize(NOTCOV ~ Age + female + AfAm + Asian + RaceOther + Hispanic + 
+                      educ_hs + educ_smcoll + educ_as + educ_bach + educ_adv + 
+                      Very_Good + Good + Fair + Poor, dat_train2, family = binomial)
+s_dat_test2 <- predict(sobj2, dat_test2)
+```
+#### OLS 2
+```{r Linear Prob Model 2}
+model_OLS2 <- lm(sobj2$formula, data = sobj2$data)
+summary(model_OLS2)
+pred_vals_OLS2 <- suppressWarnings(predict(model_OLS2, s_dat_test2))
+pred_model_OLS2 <- (pred_vals_OLS2 > 0.45)
+pred2OLStable <- table(pred = pred_model_OLS2, true = dat_test2$NOTCOV)
+pred2OLStable
+goodolspred2 <- sum((prop.table(pred2OLStable)[1,1])+(prop.table(pred2OLStable)[2,2]))
+```
+The estimates for Age, gender and education all have the same signs as they did in the initial OLS model. The health status coefficient estimates suggest that the variables of very good health and poor health correlate towards NOTCOV being zero. Intuition would suggest this is on the right track - those in very good health would have cheaper insurance premiums; those in poor health likely require health insurance to make sure all medical expenses can be covered.
 
+#### Logit 2
+```{r Logit 2}
+model_logit2 <- glm(sobj2$formula, family = binomial, data = sobj2$data)
+summary(model_logit2)
+pred_vals2 <- suppressWarnings(predict(model_logit2, s_dat_test2, type = "response"))
+pred_model_logit2 <- (pred_vals2 > 0.5)
+pred2Logtable <- table(pred = pred_model_logit2, true = dat_test2$NOTCOV)
+pred2Logtable
+goodlogpred2 <- sum((prop.table(pred2Logtable)[1,1])+(prop.table(pred2Logtable)[2,2]))
+# round(goodolspred*100, digits = 2)
+```
+The results of the Logit model align with those from the OLS model. We see a similar pattern of probability of not having health coverage. Those with more education have a lower probability of not having health insurance coverage. Those with very good health and those in poor health also have a lower probability of not having health insurance. The health status variables in the middle, Good and Fair health, while still low probabilities, tend towards not having health insurance.  
+
+#### Random Forest Model 2
+```{r Random Forest 2}
+require('randomForest')
+set.seed(54321)
+model_randFor2 <- randomForest(as.factor(NOTCOV) ~ ., data = sobj2$data, importance=TRUE, proximity=TRUE)
+print(model_randFor2)
+round(importance(model_randFor2),2)
+varImpPlot(model_randFor2)
+```
+```{r RFPred 2}
+pred_model2 <- predict(model_randFor2,  s_dat_test2)
+RFpredtable2 <- table(pred = pred_model2, true = dat_test2$NOTCOV)
+RFpredtable2
+```
+```{r Proportions of Correct Prediction 2}
+RFproppred2 <- prop.table(RFpredtable2)
+# proppred
+RFgoodpred2 <- sum((RFproppred2[1,1])+(RFproppred2[2,2]))
+# goodpred
+RFfalsepos2 <- RFproppred2[2,1]
+RFfalseneg2 <- RFproppred2[1,2]
+```
+#### SVM 2
+```{r Support Vector Machines 2}
+require(e1071)
+# tuned_parameters <- tune.svm(as.factor(NOTCOV) ~ ., data = sobj$data, gamma = 10^(-3:0), cost = 10^(-2:1)) 
+# summary(tuned_parameters)
+# figure best parameters and input into next
+svm2.model <- svm(as.factor(NOTCOV) ~ ., data = sobj2$data, cost = 10, gamma = 0.1)
+svm2.pred <- predict(svm2.model, s_dat_test2)
+SVM2predtable <- table(pred = svm2.pred, true = dat_test2$NOTCOV)
+SVM2predtable
+SVM2proppred <- prop.table(SVM2predtable)
+SVM2proppred
+SVM2goodpred <- sum((SVM2proppred[1,1])+(SVM2proppred[2,2]))
+```
 When you summarize, you should be able to explain which models predict best (noting if there is a tradeoff of false positive vs false negative) and if there are certain explanatory variables that are consistently more or less useful. Also try other lists of explanatory variables.
 
 
@@ -373,7 +480,10 @@ When you summarize, you should be able to explain which models predict best (not
 
 https://www.healthcare.gov/young-adults/children-under-26/
 
+https://bradleyboehmke.github.io/HOML/regularized-regression.html
+
 Brownlee, Jason, (2016). "Support Vector Machines for Machine Learning", https://machinelearningmastery.com/support-vector-machines-for-machine-learning/
 
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani, (2017). "Introduction to Statistical Learning", New York: Springer Science+Business Media, https://trevorhastie.github.io/ISLR/ISLR%20Seventh%20Printing.pdf 
 
+Springsteen, Bruce, (1984) "Born In The USA", *Born In The USA*, Columbia, https://www.youtube.com/watch?v=EPhWR4d3FJQ
