@@ -486,21 +486,24 @@ geom = “col”)*) on the cross-validation model of our elastic net
 regression and see that the advanced degree, bachelor’s degree and being
 married increases our likelihood of having health insurance. Whereas
 variables such as a high school education being born in the South, your
-age, being Hispanic or being born in Mexico/Central America/Carribean
+age, being Hispanic or being born in Mexico/Central America/Caribbean
 decrease your likelihood of having health insurance. It is important to
 note that the variables Hispanic and being born in Mexico/Central
-American/Caribbean are probably related and have multicollinearity. For
-this Elastic Net model has some of the ridge penatly incorporated in it
-since the alpha is set to 0.5 so it can be better fit to handle
+America/Caribbean are probably related and have multicollinearity. For
+this Elastic Net model has some of the ridge penalty incorporated in it
+since the alpha is set to 0.5 so it is better fit to handle
 multicollinearity if we set the alpha closer to 0.
 
-As elastic net performs feature selection (since it includes the Lasso
+As elastic net performs feature selection (since it includes the lasso
 penalty), the next step we would take is to remove the variables who
 have their coefficients pushed to zero from the model including all the
 other “born-from,” region-based and other variables that show as zero in
 the Variable Importance Plot below and re-run the elastic net to see how
 the prediction results improve aka our model becomes more accurate and
 also easier to interpret.
+
+![CV Elastic Net Plot](./CV%20Elastic%20Net%20Plot.png) ![VIP Elastic
+Net Plot](./VIP%20Elastic%20Net%20Plot.png)
 
 #### Ridge Regression
 
@@ -516,15 +519,19 @@ is -4.62849, as calculated from the function
 
 As ridge regression does not perform feature selection, that is why you
 see in the Variable Importance Plot below that all variables show some
-degree of shading of importance. Whereas the Lasso and Elastic Net
-regressions will zero out/push to zero the variables that are
-unimportant. As ridge regression performs better when it only has
-variables that are important, we will re-run a Ridge Regression after
-removing some of the variables we have identified as less important
-based on the Lasso and/or Elastic Net Regressions. However, this also
-means that if we DO have a model where we do not want to drop any of our
-variables for whatever reason, we can do a ridge regression as it will
-keep all available features in the final model.
+degree of shading of importance. This does not mean that the Whereas the
+Lasso and Elastic Net regressions will zero out/push to zero the
+variables that are unimportant. As ridge regression performs better when
+it only has variables that are important, we will re-run a Ridge
+Regression after removing some of the variables we have identified as
+less important based on the Lasso and/or Elastic Net Regressions.
+However, this also means that if we DO have a model where we do not want
+to drop any of our variables for whatever reason, we can do a ridge
+regression as it will keep all available features in the final model.
+
+![CV Ridge Plot](./CV%20Ridge%20Plot%20.png)
+
+![VIP Ridge Plot](./VIP%20Ridge%20Plot.png)
 
 #### Lasso Regression
 
@@ -556,7 +563,10 @@ both the ridge penalty and the lasso penalty: getting effective
 regularization from the ridge penalty and also the explanatory variable
 importance selection of the lasso penalty.
 
-#### Results Comparison: Regularization Regression
+![CV Lasso Plot](./CV%20Lasso%20Plot.png) ![VIP Lasso
+Plot](./VIP%20Lasso%20Plot.png)
+
+#### Regularization Regression: Results comparison
 
 Overall, the correct prediction percentage between the three models are
 very close, even between the ridge and lasso regressions as that is
@@ -567,21 +577,72 @@ that of the ridge and lasso. Even tweaking the elastic net alpha from
 prediction percentage closer to the lasso’s percentage, which makes
 sense since the alpha is getting closer to 1 (a lasso regression).
 
-But all three of these results are significantly less than the \~80%+ we
-are seeing from Random Forest and Support Vector Machines.
+A big callout from the correct prediction rates from these three
+regularized regressions is that the False Positive rates are very high
+at \~30%. This is a “good” problem to have as the model is predicting
+someone to not have health coverage when in fact they do. So at least
+when these people who think they do not have health insurance get into a
+car accident have to be rushed off to an emergency room will be
+pleasantly surprised to find out that they IN FACT HAVE health insurance
+to cover the expensive hospital visit they just had.
+
+But all three of these results are significantly less than the 85.6%
+good prediction rate we are seeing from Random Forest and 85.12 % we are
+seeing from the Support Vector Machine. That is a difference of \~22%
+which is certainly a significant difference in correct prediction
+between machine learning models no matter what field, industry, or
+company you are working in. This maybe due to the fact that these
+Regularization regression methods are not made for a 0/1 dependent
+variable.
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 34403  3719
+    ##   TRUE  19513  6160
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 34372  3703
+    ##   TRUE  19544  6176
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 34403  3721
+    ##   TRUE  19513  6158
+
+    ##        true
+    ## pred             0          1
+    ##   FALSE 0.53927424 0.05829610
+    ##   TRUE  0.30587037 0.09655929
+
+    ##        true
+    ## pred             0          1
+    ##   FALSE 0.53878831 0.05804530
+    ##   TRUE  0.30635630 0.09681009
+
+    ##        true
+    ## pred             0          1
+    ##   FALSE 0.53927424 0.05832746
+    ##   TRUE  0.30587037 0.09652794
+
+    ## [1] 0.6358335
+
+    ## [1] 0.6355984
+
+    ## [1] 0.6358022
 
 ### Other Explanatory Variables
 
-Based on the results from the previous Random Forest, SVM and Lasso
-models, we noticed that REGION and region\_born were consistently
-unimportant to the models. Age, education, gender and marriage variables
-were all important, across all models. To test how these models would
-handle other variables, we removed REGION, region\_born and the marriage
-variables. We created a factor from the person\_healthstatus
-observations and included them in a new subset to test. We noticed that
-the factor excluded observations that had been coded “Excellent”, which
-will influence how the models make the comparisons between the
-observations.
+Based on the results from the previous Random Forest, SVM and
+Regularization models, we noticed that REGION and region\_born were
+consistently unimportant to the models. Age, education, gender and
+marriage variables were all important, across all models. To test how
+these models would handle other variables, we removed REGION,
+region\_born and the marriage variables. We created a factor from the
+person\_healthstatus observations and included them in a new subset to
+test. We noticed that the factor excluded observations that had been
+coded “Excellent”, which will influence how the models make the
+comparisons between the observations.
 
     ## [1] 79572
 
@@ -737,18 +798,12 @@ low rates of health coverage.
     ## pred          0          1
     ##    0 0.82892076 0.13512031
     ##    1 0.01622384 0.01973509
-
     ## [1] 0.8486559
 
 The second SVM model has a decrease in correct prediction rate of 0.26%.
 This is a smaller change than the difference in correct prediction rates
 of the Random Forest models (0.71%)
 
-#### Elastic Net 2
-
-#### Ridge Regression 2
-
-#### Lasso Regression 2
 
 #### Results Comparison 2: Regularization Regression
 
@@ -759,9 +814,46 @@ correct prediction rates actually went down\! This is very surprising as
 we thought that dropping variables marked as not important would improve
 our model and therefore improve the prediction accuracy.
 
-It appears that the majority of the shift was from the True Falses,
-which were at \~53% but are now at \~49%, to the False Positives, which
-were at \~30% and are now at \~35%.
+It appears that the majority of the shift was from the True Falses
+(which were at \~53% but are now at \~49%) to the False Positives (which
+were at \~30% and are now at \~35%). This increase in the False Positive
+rates would be a “bad” problem from an insurance or
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 31285  3651
+    ##   TRUE  22631  6228
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 31247  3658
+    ##   TRUE  22669  6221
+
+    ##        true
+    ## pred        0     1
+    ##   FALSE 31285  3650
+    ##   TRUE  22631  6229
+
+    ##        true
+    ## pred             0          1
+    ##   FALSE 0.49039893 0.05723019
+    ##   TRUE  0.35474567 0.09762521
+
+    ##        true
+    ## pred             0          1
+    ##   FALSE 0.48980328 0.05733992
+    ##   TRUE  0.35534133 0.09751548
+
+    ##        true
+    ## pred             0          1
+    ##   FALSE 0.49039893 0.05721452
+    ##   TRUE  0.35474567 0.09764088
+
+    ## [1] 0.5880241
+
+    ## [1] 0.5873188
+
+    ## [1] 0.5880398
 
 ### Summary
 

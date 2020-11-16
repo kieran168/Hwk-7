@@ -242,18 +242,20 @@ Looking at the plot of our cross-validation ridge regression across all the lamb
 
 We chose to set alpha = 0.5 so that there will be an equal combination of the Lasso penalty and the Ridge penalty.
 
-Next, we want to identify which variables are most important to our model which the elastic net regression can help us with. We run a Variable Important Plot (*vip(cvmodel1_elasticnet, num_features = 50, geom = "col")*) on the cross-validation model of our elastic net regression and see that the advanced degree, bachelor's degree and being married increases our likelihood of having health insurance. Whereas variables such as a high school education being born in the South, your age, being Hispanic or being born in Mexico/Central America/Carribean decrease your likelihood of having health insurance. It is important to note that the variables Hispanic and being born in Mexico/Central American/Caribbean are probably related and have multicollinearity. For this Elastic Net model has some of the ridge penatly incorporated in it since the alpha is set to 0.5 so it can be better fit to handle multicollinearity if we set the alpha closer to 0.
+Next, we want to identify which variables are most important to our model which the elastic net regression can help us with. We run a Variable Important Plot (*vip(cvmodel1_elasticnet, num_features = 50, geom = "col")*) on the cross-validation model of our elastic net regression and see that the advanced degree, bachelor's degree and being married increases our likelihood of having health insurance. Whereas variables such as a high school education being born in the South, your age, being Hispanic or being born in Mexico/Central America/Caribbean decrease your likelihood of having health insurance. It is important to note that the variables Hispanic and being born in Mexico/Central America/Caribbean are probably related and have multicollinearity. For this Elastic Net model has some of the ridge penalty incorporated in it since the alpha is set to 0.5 so it is better fit to handle multicollinearity if we set the alpha closer to 0.
 
-As elastic net performs feature selection (since it includes the Lasso penalty), the next step we would take is to remove the variables who have their coefficients pushed to zero from the model including all the other "born-from," region-based and other variables that show as zero in the Variable Importance Plot below and re-run the elastic net to see how the prediction results improve aka our model becomes more accurate and also easier to interpret.
+As elastic net performs feature selection (since it includes the lasso penalty), the next step we would take is to remove the variables who have their coefficients pushed to zero from the model including all the other "born-from," region-based and other variables that show as zero in the Variable Importance Plot below and re-run the elastic net to see how the prediction results improve aka our model becomes more accurate and also easier to interpret.
 
+![CV Elastic Net Plot](./CV Elastic Net Plot.png)
+![VIP Elastic Net Plot](./VIP Elastic Net Plot.png)
 
-```{r Elastic Net Regression, eval = FALSE}
+```{r Elastic Net Regression, include = FALSE}
 # Elastic Net
 # install.packages("glmnet")
 # install.packages("vip")
 require(vip)
 require(glmnet)
-model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.7)
+model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5)
 
 par(mar=c(4.5,4.5,1,4))
 plot(model1_elasticnet)
@@ -265,7 +267,7 @@ plot(model1_elasticnet, xvar = "lambda")
 plot(model1_elasticnet, xvar = "dev", label = TRUE)
 print(model1_elasticnet)
 
-cvmodel1_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV), alpha = 0.7) 
+cvmodel1_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV), alpha = 0.5) 
 cvmodel1_elasticnet$lambda.min
 log(cvmodel1_elasticnet$lambda.min)
 coef(cvmodel1_elasticnet, s = "lambda.min")
@@ -284,17 +286,20 @@ ElasticNetproppred
 ElasticNetgoodpred <- sum((ElasticNetproppred[1,1])+(ElasticNetproppred[2,2]))
 ElasticNetgoodpred
 
-model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.7) 
+model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
 model2_elasticnet
 ```
 
 #### Ridge Regression
 Looking at the plot of our cross-validation ridge regression across all the lambda values (*plot(cvmodel1_ridge)*), we see a slight improvement in the MSE as our penalty log(lambda) gets larger, which suggests that a regular OLS model likely overfits the training data. But if we continue to constrain the MSE further (i.e increase the penalty), our MSE starts to increase. In this plot we can also see the optimal lambda (the log value of the lambda which best minimizes the error in cross-validation) is -4.62849, as calculated from the function *log(cvmodel1_ridge$lambda.min)*. 
+ 
+As ridge regression does not perform feature selection, that is why you see in the Variable Importance Plot below that all variables show some degree of shading of importance. This does not mean that the  Whereas the Lasso and Elastic Net regressions will zero out/push to zero the variables that are unimportant. As ridge regression performs better when it only has variables that are important, we will re-run a Ridge Regression after removing some of the variables we have identified as less important based on the Lasso and/or Elastic Net Regressions. However, this also means that if we DO have a model where we do not want to drop any of our variables for whatever reason, we can do a ridge regression as it will keep all available features in the final model.
 
-As ridge regression does not perform feature selection, that is why you see in the Variable Importance Plot below that all variables show some degree of shading of importance. Whereas the Lasso and Elastic Net regressions will zero out/push to zero the variables that are unimportant. As ridge regression performs better when it only has variables that are important, we will re-run a Ridge Regression after removing some of the variables we have identified as less important based on the Lasso and/or Elastic Net Regressions. However, this also means that if we DO have a model where we do not want to drop any of our variables for whatever reason, we can do a ridge regression as it will keep all available features in the final model.
+![CV Ridge Plot ](./CV Ridge Plot .png)
 
+![VIP Ridge Plot](./VIP Ridge Plot.png)
 
-```{r Ridge Regression, eval = FALSE}
+```{r Ridge Regression, include = FALSE}
 # Ridge
 # install.packages("glmnet")
 # install.packages("vip")
@@ -337,8 +342,10 @@ Looking at the plot of our cross-validation lasso regression across all the lamb
 
 And as the lasso regression also performs a automated explanatory variable importance selection by using it's ridge penalty to push variables not just approximately to zero, but all the way to zero, we can look at the Variable Important Plot to identify which variables are less important. The Variable Important Plot function is informing us that the "born-in" variables along with the "Region." variables and some other various variables are not important as they have no shading as the coefficients of these variables have been pushed to zero by the lasso regression. Compared to the elastic net regression we ran above, this lasso regression marks the same variables as important as the elastic net, but this lasso regression includes a few more: some college education and female are (both more likely for health insurance) & Race_Other, born Africa, born South America (all three less likely for having health insurance). This makes senses as the Elastic Net includes both the ridge penalty and the lasso penalty: getting effective regularization from the ridge penalty and also the explanatory variable importance selection of the lasso penalty.
 
+![CV Lasso Plot](./CV Lasso Plot.png)
+![VIP Lasso Plot](./VIP Lasso Plot.png)
 
-```{r Lasso Regression, eval = FALSE}
+```{r Lasso Regression, include = FALSE}
 # Lasso
 # install.packages("glmnet")
 # install.packages("vip")
@@ -377,12 +384,14 @@ model2_lasso <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 1)
 model2_lasso
 ```
 
-#### Results Comparison: Regularization Regression
+#### Regularization Regression: Results comparison
 Overall, the correct prediction percentage between the three models are very close, even between the ridge and lasso regressions as that is where you expect to see the largest differences which differ by less than 0.0003%. The elastic net's prediction results are right in between that of the ridge and lasso. Even tweaking the elastic net alpha from 0.5 to 0.7 we only see a slight change that brings the correct prediction percentage closer to the lasso's percentage, which makes sense since the alpha is getting closer to 1 (a lasso regression). 
 
-But all three of these results are significantly less than the ~80%+ we are seeing from Random Forest and Support Vector Machines. 
+A big callout from the correct prediction rates from these three regularized regressions is that the False Positive rates are very high at ~30%. This is a "good" problem to have as the model is predicting someone to not have health coverage when in fact they do. So at least when these people who think they do not have health insurance get into a car accident have to be rushed off to an emergency room will be pleasantly surprised to find out that they IN FACT HAVE health insurance to cover the expensive hospital visit they just had.
 
-```{r Comparison, eval = FALSE}
+But all three of these results are significantly less than the 85.6% good prediction rate we are seeing from Random Forest and 85.12 % we are seeing from the Support Vector Machine. That is a difference of ~22% which is certainly a significant difference in correct prediction between machine learning models no matter what field, industry, or company you are working in. This maybe due to the fact that these Regularization regression methods are not made for a 0/1 dependent variable.
+
+```{r Comparison}
 table(pred = pred_model1_elasnet, true = dat_test$NOTCOV)
 table(pred = pred_model1_ridge, true = dat_test$NOTCOV)
 table(pred = pred_model1_lasso, true = dat_test$NOTCOV)
@@ -398,7 +407,7 @@ Ridgegoodpred
 Lassogoodpred
 ```
 ### Other Explanatory Variables
-Based on the results from the previous Random Forest, SVM and Lasso models, we noticed that REGION and region_born were consistently unimportant to the models. Age, education, gender and marriage variables were all important, across all models. To test how these models would handle other variables, we removed REGION, region_born and the marriage variables. We created a factor from the person_healthstatus observations and included them in a new subset to test. We noticed that the factor excluded observations that had been coded "Excellent", which will influence how the models make the comparisons between the observations.
+Based on the results from the previous Random Forest, SVM and Regularization models, we noticed that REGION and region_born were consistently unimportant to the models. Age, education, gender and marriage variables were all important, across all models. To test how these models would handle other variables, we removed REGION, region_born and the marriage variables. We created a factor from the person_healthstatus observations and included them in a new subset to test. We noticed that the factor excluded observations that had been coded "Excellent", which will influence how the models make the comparisons between the observations.
 ```{r HealthStat Varb}
 healthstat <- data.frame(model.matrix(~ dat2$person_healthstatus))
 dat_for_analysis2 <- data.frame(
@@ -511,14 +520,14 @@ SVM2goodpred
 ```
 The second SVM model has a decrease in correct prediction rate of `r round(sum(SVMgoodpred-SVM2goodpred)*100, digits = 2)`%. This is a smaller change than the difference in correct prediction rates of the Random Forest models (`r round(sum(RFgoodpred-RFgoodpred2)*100, digits = 2)`%)
 
-#### Elastic Net 2
-```{r Elastic Net 2 Regression, eval = FALSE}
+
+```{r Elastic Net 2 Regression, include = FALSE}
 # Elastic Net
 # install.packages("glmnet")
 # install.packages("vip")
 require(vip)
 require(glmnet)
-model1_elasticnet2 <-  glmnet(as.matrix(sobj2$data[,-1]),sobj2$data$NOTCOV, alpha = 0.7)
+model1_elasticnet2 <-  glmnet(as.matrix(sobj2$data[,-1]),sobj2$data$NOTCOV, alpha = 0.5)
 
 par(mar=c(4.5,4.5,1,4))
 plot(model1_elasticnet2)
@@ -530,7 +539,7 @@ plot(model1_elasticnet2, xvar = "lambda")
 plot(model1_elasticnet2, xvar = "dev", label = TRUE)
 print(model1_elasticnet2)
 
-cvmodel1_elasticnet2 = cv.glmnet(data.matrix(sobj2$data[,-1]),data.matrix(sobj2$data$NOTCOV), alpha = 0.7) 
+cvmodel1_elasticnet2 = cv.glmnet(data.matrix(sobj2$data[,-1]),data.matrix(sobj2$data$NOTCOV), alpha = 0.5) 
 cvmodel1_elasticnet2$lambda.min
 log(cvmodel1_elasticnet2$lambda.min)
 coef(cvmodel1_elasticnet2, s = "lambda.min")
@@ -549,12 +558,14 @@ ElasticNetproppred2
 ElasticNetgoodpred2 <- sum((ElasticNetproppred2[1,1])+(ElasticNetproppred2[2,2]))
 ElasticNetgoodpred2
 
-model2_elasticnet2 <-  glmnet(as.matrix(sobj2$data[,-1]),sobj2$data$NOTCOV, alpha = 0.7) 
+model2_elasticnet2 <-  glmnet(as.matrix(sobj2$data[,-1]),sobj2$data$NOTCOV, alpha = 0.5) 
 model2_elasticnet2
 ```
 
-#### Ridge Regression 2
-```{r Ridge Regression 2, eval = FALSE}
+
+
+
+```{r Ridge Regression 2, include = FALSE}
 # Ridge
 # install.packages("glmnet")
 # install.packages("vip")
@@ -593,8 +604,8 @@ model2_ridge2 <-  glmnet(as.matrix(sobj2$data[,-1]),sobj2$data$NOTCOV, alpha = 0
 model2_ridge2
 ```
 
-#### Lasso Regression 2
-```{r Lasso Regression 2, eval = FALSE}
+
+```{r Lasso Regression 2, include = FALSE}
 # Lasso
 # install.packages("glmnet")
 # install.packages("vip")
@@ -633,21 +644,19 @@ model2_lasso2 <-  glmnet(as.matrix(sobj2$data[,-1]),sobj2$data$NOTCOV, alpha = 1
 model2_lasso2
 ```
 
-#### Results Comparison 2: Regularization Regression
-So after dropping some of the explanatory variables that were deemed to be less important to the model by the Variable Important Plots and re-running the three regularization regression models, we see that the correct prediction rates actually went down! This is very surprising as we thought  that dropping variables marked as not important would improve our model and therefore improve the prediction accuracy.
+#### Regularization Regression 2: Results comparison
+So after dropping some of the explanatory variables that were deemed to be less important to the model by the Variable Important Plots and re-running the three regularization regression models, we see that the correct prediction rates actually went down! This is very surprising as we thought that dropping variables marked as not important would improve our model and therefore improve the prediction accuracy.
 
-It appears that the majority of the shift was from the True Falses, which were at ~53% but are now at ~49%, to the False Positives, which were at ~30% and are now at ~35%. 
+It appears that the majority of the shift was from the True Falses (which were at ~53% but are now at ~49%) to the False Positives (which were at ~30% and are now at ~35%). This increase in the False Positive rates would be a "bad" problem from an insurance or 
 
-```{r Comparison 2, eval = FALSE}
+```{r Comparison 2}
 table(pred = pred_model1_elasnet2, true = dat_test$NOTCOV)
 table(pred = pred_model1_ridge2, true = dat_test$NOTCOV)
 table(pred = pred_model1_lasso2, true = dat_test$NOTCOV)
 
-
 ElasticNetproppred2
 RidgeNetproppred2
 LassoNetproppred2
-
 
 ElasticNetgoodpred2
 Ridgegoodpred2
