@@ -280,8 +280,6 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
-    ## Warning: package 'randomForest' was built under R version 4.0.3
-
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -442,35 +440,96 @@ be higher. A person who was predicted to not have coverage can still be
 pitched with other health insurance products if they already have some
 sort of coverage.
 
+### Regularized Regression Models (Elastic Net, Ridge, Lasso)
+
+We have run one model for each of the regularized regression models:
+Elastic Net, Ridge, and Lasso. We ran one for each to be able to see and
+understand the difference between the three. Lastly, after going through
+the three models individually, we will compare the prediction results at
+the end.
+
+As we have made sure to standardize our explanatory variables, the
+coefficients are all on a common scale and that means the penalty terms
+we will be applying in these models will equally penalize all predictors
+(e.g. Age will not be penalized more than female = “1”).
+
+Being able to remove explanatory variables from our models that have
+been overloaded with explanatory variables helps make our models more
+interpretable. We want to remove explanatory variables that are not
+contributing to our model because as the number of explanatory variables
+increase, the more likely we will tend to overfit our training data and
+underfit our testing data.
+
 ### Elastic Net
 
-We have run one model for each if the regularized regression models:
-Elastic Net, Ridge, and Lasso. We ran one for each to be able to see the
-difference between the three and also to see how each would fare in
-their final prediction results.
+In our elastic net regression, looking at the plot of our
+cross-validation ridge regression across all the lambda values
+(*plot(cvmodel1\_elasticnet)*), we see a slight improvement in the MSE
+as our penalty log(lambda) gets larger, which suggests that a regular
+OLS model likely overfits the training data. But if we continue to
+constrain the MSE further (i.e increase the penalty), our MSE starts to
+increase. In this plot we can also see the optimal lambda (the log value
+of the lambda which best minimizes the error in cross-validation) is
+-7.772985, as calculated from the function
+*log(cvmodel1\_elasticnet$lambda.min)*.
 
-We first run the Elastic Net model which helps us identify which
-variables are of most important to our model
+We chose to set alpha = 0.5 so that there will be an equal combination
+of the Lasso penalty and the Ridge penalty.
 
-In contrast, a more modern approach, called soft thresholding, slowly
-pushes the effects of irrelevant features toward zero, and in some
-cases, will zero out entire coefficients. As will be demonstrated, this
-can result in more accurate models that are also easier to interpret
+Next, we want to identify which variables are most important to our
+model which the elastic net regression can help us with. We run a
+Variable Important Plot (*vip(cvmodel1\_elasticnet, num\_features = 50,
+geom = “col”)*) on the cross-validation model of our elastic net
+regression and see that the advanced degree, bachelor’s degree and being
+married increases our likelihood of having health insurance. Whereas
+variables such as a high school education being born in the South, your
+age, being Hispanic or being born in Mexico/Central America/Carribean
+decrease your likelihood of having health insurance. It is important to
+note that the variables Hispanic and being born in Mexico/Central
+American/Caribbean are probably related and have multicollinearity. For
+this Elastic Net model has some of the ridge penatly incorporated in it
+since the alpha is set to 0.5 so it can be better fit to handle
+multicollinearity if we set the alpha closer to 0.
 
-Ridge Regression Explanation: In our ridge regression analysis, we
-haveTherefore Ridge regression decreases the complexity of a model but
-does not reduce the number of variables, it rather just shrinks their
-effect. As ridge regression does not perform feature selection, it is
-best if we re-run a Ridge Regression after removing some of the
-variables we have identified as less important to the model from the
-Lasso Regression and/or Random Forest. However, this means that if WE DO
-have a model where we do not want to drop any of our variables for
-whatever reason, we can do a ridge regression as it will keep all
-avaiable features in the final model.
+As elastic net performs feature selection (since it includes the Lasso
+penalty), the next step we would take is to remove the variables who
+have their coefficients pushed to zero from the model including all the
+other “born-from,” region-based and other variables that show as zero in
+the Variable Importance Plot below and re-run the elastic net to see how
+the prediction results improve aka our model becomes more accurate and
+also easier to interpret.
 
-Lasso Explanation: The results of our lasso regression along with the
-Variable Important Plot (VIP) function is informing us that the
-“born-in” variables along with “Region.” variables have
+Ridge Regression Explanation: In our ridge regression, looking at the
+plot of our cross-validation ridge regression across all the lambda
+values (*plot(cvmodel1\_ridge)*), we see a slight improvement in the MSE
+as our penalty log(lambda) gets larger, which suggests that a regular
+OLS model likely overfits the training data. But if we continue to
+constrain the MSE further (i.e increase the penalty), our MSE starts to
+increase. In this plot we can also see the optimal lambda (the log value
+of the lambda which best minimizes the error in cross-validation) is
+-4.62849, as calculated from the function
+*log(cvmodel1\_ridge$lambda.min)*.
+
+As ridge regression does not perform feature selection, it is best if we
+re-run a Ridge Regression after removing some of the variables we have
+identified as less important to the model from the Lasso Regression.
+However, this means that if WE DO have a model where we do not want to
+drop any of our variables for whatever reason, we can do a ridge
+regression as it will keep all available features in the final model.
+
+Lasso Explanation: In our lasso regression, looking at the plot of our
+cross-validation lasso regression across all the lambda values
+(*plot(cvmodel1\_lasso)*), we see a slight improvement in the MSE as our
+penalty log(lambda) gets larger, which suggests that a regular OLS model
+likely overfits the training data. But if we continue to constrain the
+MSE further (i.e increase the penalty), our MSE starts to increase. In
+this plot we can also see the optimal lambda (the log value of the
+lambda which best minimizes the error in cross-validation) is -8.187031,
+as calculated from the function *log(cvmodel1\_lasso$lambda.min)*.
+
+The results of our lasso regression along with the Variable Important
+Plot (VIP) function is informing us that the “born-in” variables along
+with “Region.” variables have
 
 Lasso drives coefficients to zero. The larger the value of lambda the
 more of the explanatory variables (aka features) are shrunk to zero.
@@ -478,7 +537,6 @@ This is similar to the Random Forest model that tells us which
 explanatory variables are of most importance. This process is The
 explanatory variables that are not shrunk toward zero signify that they
 are important to
-
 
 ### Other Explanatory Variables
 
@@ -645,7 +703,6 @@ probabilities, tend towards not having health insurance.
     ## pred          0          1
     ##    0 0.82892076 0.13512031
     ##    1 0.01622384 0.01973509
-
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
