@@ -394,8 +394,6 @@ applied to the overall test data.
 
     ## Loading required package: e1071
 
-    ## Warning: package 'e1071' was built under R version 4.0.3
-
     ##     true
     ## pred     0     1
     ##    0 52412  7986
@@ -445,6 +443,42 @@ pitched with other health insurance products if they already have some
 sort of coverage.
 
 ### Elastic Net
+
+We have run one model for each if the regularized regression models:
+Elastic Net, Ridge, and Lasso. We ran one for each to be able to see the
+difference between the three and also to see how each would fare in
+their final prediction results.
+
+We first run the Elastic Net model which helps us identify which
+variables are of most important to our model
+
+In contrast, a more modern approach, called soft thresholding, slowly
+pushes the effects of irrelevant features toward zero, and in some
+cases, will zero out entire coefficients. As will be demonstrated, this
+can result in more accurate models that are also easier to interpret
+
+Ridge Regression Explanation: In our ridge regression analysis, we
+haveTherefore Ridge regression decreases the complexity of a model but
+does not reduce the number of variables, it rather just shrinks their
+effect. As ridge regression does not perform feature selection, it is
+best if we re-run a Ridge Regression after removing some of the
+variables we have identified as less important to the model from the
+Lasso Regression and/or Random Forest. However, this means that if WE DO
+have a model where we do not want to drop any of our variables for
+whatever reason, we can do a ridge regression as it will keep all
+avaiable features in the final model.
+
+Lasso Explanation: The results of our lasso regression along with the
+Variable Important Plot (VIP) function is informing us that the
+“born-in” variables along with “Region.” variables have
+
+Lasso drives coefficients to zero. The larger the value of lambda the
+more of the explanatory variables (aka features) are shrunk to zero.
+This is similar to the Random Forest model that tells us which
+explanatory variables are of most importance. This process is The
+explanatory variables that are not shrunk toward zero signify that they
+are important to
+
 
 ### Other Explanatory Variables
 
@@ -611,6 +645,7 @@ probabilities, tend towards not having health insurance.
     ## pred          0          1
     ##    0 0.82892076 0.13512031
     ##    1 0.01622384 0.01973509
+
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
