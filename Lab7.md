@@ -280,8 +280,6 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
-    ## Warning: package 'randomForest' was built under R version 4.0.3
-
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -393,8 +391,6 @@ applied to the overall test data.
 ### Support Vector Machines
 
     ## Loading required package: e1071
-
-    ## Warning: package 'e1071' was built under R version 4.0.3
 
     ##     true
     ## pred     0     1
@@ -782,7 +778,13 @@ our models and their prediction accuracy.
 
 It appears that the majority of the shift was from the True Negatives
 (which were at \~53% but are now at \~49%) to the False Positives (which
-were at \~30% and are now at \~35%).
+
+were at \~30% and are now at \~35%). This increase in the False Positive
+rates would be a “bad” problem from the viewpoint of an insurance
+company because their prediction model is telling their sales department
+that they don’t need to tap that market to sell more insurance policies.
+This would be a lost opportunity for them.
+
 
     ##        true
     ## pred        0     1
@@ -820,12 +822,46 @@ were at \~30% and are now at \~35%).
 
     ## [1] 0.5880398
 
-### Summary
+### Conclusion
 
-When you summarize, you should be able to explain which models predict
-best (noting if there is a tradeoff of false positive vs false negative)
-and if there are certain explanatory variables that are consistently
-more or less useful. Also try other lists of explanatory variables.
+In trying to predict if a person has health coverage or not, we ran
+through many machine learning models and have compared the results.
+Overall, it seems that OLS, Logit, Random Forest, and Support Vector
+machines are able to achieve \~85% correct prediction rates. Whereas the
+regularization regression methods are only able to achieve \~63%. We
+expected the regularization regression to result in lower prediction
+rates as these regression methods are not well suited for a 0/1 dependent
+variable.
+
+We also re-ran all our models dropping some less important variables
+that our Random Forest predicted to be not important. The results show
+only a small drop in the correct prediction rates for OLS, Logit, Random
+Forest and Support Vector Machines for \~84%. The regularization methods
+showed the biggest drop from \~63% correct to \~58% correct. It
+appears that OLS, Logit, Random Forest and Support Vector Machine are
+predicting similar rates. To distinguish them, we need to look
+the False Positive and False
+Negative rates. Depending on the situation and circumstances one result
+would be considered worse than the other. For example, from the
+perspective of an AIDS test, we would really not want to see any false
+negatives, as that group of people may unknowingly spread the disease.
+If we were talking about having health insurance or not, we would
+not want people to receive a false positive result that the model
+predicts they have health insurance when in fact they do not (0 = no
+coverage & 1 = coverage).
+
+There were also some explanatory variables that stood out to us. Having
+an advanced/bachelor’s degree and being married were the most important
+variables in predicting if someone had health coverage. When it came
+to important variables that helped predict if someone did not have
+health insurance, being Hispanic and being born in Mexico/Central
+America/Caribbean were strong predictors of this.
+
+As we continue making progress on our final projects, we will certainly
+be using these machine learning techniques. For example, as we narrow
+down on our topics we are hoping to run into the problem of “too much
+data” in which case we can use the Random Tree and Lasso Regression to
+help us narrow down variables we should focus our attention on.
 
 ### Bibliography
 
@@ -833,6 +869,7 @@ more or less useful. Also try other lists of explanatory variables.
 
 <https://www.healthcare.gov/young-adults/children-under-26/>
 
+Boehmke, Bradley and Brandow Greenwell, (2020). "Hands-On Machine Learning with R", CRC Press.
 <https://bradleyboehmke.github.io/HOML/regularized-regression.html>
 
 Brownlee, Jason, (2016). “Support Vector Machines for Machine Learning”,
