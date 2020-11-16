@@ -388,8 +388,6 @@ applied to the overall test data.
 
     ## Loading required package: e1071
 
-    ## Warning: package 'e1071' was built under R version 4.0.3
-
     ##     true
     ## pred     0     1
     ##    0 52412  7986
@@ -436,42 +434,42 @@ be higher. A person who was predicted to not have coverage can still be
 pitched with other health insurance products if they already have some
 sort of coverage.
 
-    ## Loading required package: e1071
-
-    ##     true
-    ## pred          0          1
-    ##    0 0.82156909 0.12518222
-    ##    1 0.02357552 0.02967317
-
-    ## [1] 0.8512423
-
-Running the SVM as given produces a correct prediction rate of 85.12%.
-We can change the SVM model by adjusted the cost and gamma parameters.
-The cost parameter determines the tolerance the model has to violations
-of the margins of the separating plane; the higher the cost, the
-narrower the margin, which produces results with high variance but a
-lower bias. With higher variance, the model may give [different
-estimates](https://machinelearningmastery.com/support-vector-machines-for-machine-learning/)
-for the function of the separating plane when applied to different data
-sets. If we want to lower the variance to keep estimates produced by the
-model similar as we change data sets, we need to increase the bias - we
-have to accept that the model makes more assumptions about the form of
-the separating function. To keep estimates more consistent across
-different data sets, we have to accept that the model will lose
-predictive power.
-
-If we are comfortable with the data set at hand and seek strong
-predictive power, we can set our cost high, increasing the variance and
-lowering the bias of the model - similar to a logistic model. If we wish
-to look at multiple data-sets, to assess correlation and causality, the
-SVM model has to be adjusted with lower cost, reducing the variance and
-increasing the bias - similar to an OLS model.
-
 ### Elastic Net
 
-Here is Elastic Net. It combines LASSO with Ridge and the alpha
-parameter (from 0 to 1) determines the relative weight. Begin with alpha
-= 1 so just LASSO.
+We have run one model for each if the regularized regression models:
+Elastic Net, Ridge, and Lasso. We ran one for each to be able to see the
+difference between the three and also to see how each would fare in
+their final prediction results.
+
+We first run the Elastic Net model which helps us identify which
+variables are of most important to our model
+
+In contrast, a more modern approach, called soft thresholding, slowly
+pushes the effects of irrelevant features toward zero, and in some
+cases, will zero out entire coefficients. As will be demonstrated, this
+can result in more accurate models that are also easier to interpret
+
+Ridge Regression Explanation: In our ridge regression analysis, we
+haveTherefore Ridge regression decreases the complexity of a model but
+does not reduce the number of variables, it rather just shrinks their
+effect. As ridge regression does not perform feature selection, it is
+best if we re-run a Ridge Regression after removing some of the
+variables we have identified as less important to the model from the
+Lasso Regression and/or Random Forest. However, this means that if WE DO
+have a model where we do not want to drop any of our variables for
+whatever reason, we can do a ridge regression as it will keep all
+avaiable features in the final model.
+
+Lasso Explanation: The results of our lasso regression along with the
+Variable Important Plot (VIP) function is informing us that the
+“born-in” variables along with “Region.” variables have
+
+Lasso drives coefficients to zero. The larger the value of lambda the
+more of the explanatory variables (aka features) are shrunk to zero.
+This is similar to the Random Forest model that tells us which
+explanatory variables are of most importance. This process is The
+explanatory variables that are not shrunk toward zero signify that they
+are important to
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)

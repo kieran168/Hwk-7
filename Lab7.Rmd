@@ -229,14 +229,19 @@ If we are comfortable with the data set at hand and seek strong predictive power
 Changing the gamma value in the model adjusts the flexibility of the separating plane. We removed the gamma value from the model and saw that while our True Negative prediction rate increased by 0.74%, our True Positive rate decreased by 0.22%. The trade off of these change in predictions depends on the context of the person asking the questions of the model. For a policy maker, correctly identifying those who lack healthcare coverage is important. Misallocating resources to provide health services to demographics that already have good access to those service is a waste of critical government infrastructure and revenues. For a health insurance company, the tolerance of misclassification may be higher. A person who was predicted to not have coverage can still be pitched with other health insurance products if they already have some sort of coverage.
 
 ### Elastic Net
-Here is Elastic Net. It combines LASSO with Ridge and the alpha parameter (from 0 to 1) determines the relative weight. Begin with alpha = 1 so just LASSO.
+We have run one model for each if the regularized regression models: Elastic Net, Ridge, and Lasso. We ran one for each to be able to see the difference between the three and also to see how each would fare in their final prediction results.
+
+We first run the Elastic Net model which helps us identify which variables are of most important to our model 
+
+In contrast, a more modern approach, called soft thresholding, slowly pushes the effects of irrelevant features toward zero, and in some cases, will zero out entire coefficients. As will be demonstrated, this can result in more accurate models that are also easier to interpret
+
 ```{r Elastic Net Regression, eval = FALSE}
 # Elastic Net
 # install.packages("glmnet")
 # install.packages("vip")
 require(vip)
 require(glmnet)
-model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5)
+model1_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.2, lambda = 100)
 
 par(mar=c(4.5,4.5,1,4))
 plot(model1_elasticnet)
@@ -247,13 +252,12 @@ axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=
 plot(model1_elasticnet, xvar = "lambda")
 plot(model1_elasticnet, xvar = "dev", label = TRUE)
 print(model1_elasticnet)
-vip(model1_elasticnet, num_features = 50, geom = "point")
-#https://bradleyboehmke.github.io/HOML/regularized-regression.html
 
-cvmodel1_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
+cvmodel1_elasticnet = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV),lambda = 100) 
 cvmodel1_elasticnet$lambda.min
 log(cvmodel1_elasticnet$lambda.min)
 coef(cvmodel1_elasticnet, s = "lambda.min")
+vip(cvmodel1_elasticnet, num_features = 50, geom = "col") #https://bradleyboehmke.github.io/HOML/regularized-regression.html
 
 pred1_elasnet <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_elasticnet$lambda.min)
 pred_model1_elasnet <- (pred1_elasnet < mean(pred1_elasnet)) 
@@ -265,10 +269,12 @@ ElasticNetproppred
 ElasticNetgoodpred <- sum((ElasticNetproppred[1,1])+(ElasticNetproppred[2,2]))
 ElasticNetgoodpred
 
-model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.5) 
+model2_elasticnet <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0.2) 
 model2_elasticnet
 ```
 
+Ridge Regression Explanation: 
+In our ridge regression analysis, we haveTherefore Ridge regression decreases the complexity of a model but does not reduce the number of variables, it rather just shrinks their effect. As ridge regression does not perform feature selection, it is best if we re-run a Ridge Regression after removing some of the variables we have identified as less important to the model from the Lasso Regression and/or Random Forest. However, this means that if WE DO have a model where we do not want to drop any of our variables for whatever reason, we can do a ridge regression as it will keep all avaiable features in the final model.
 
 
 ```{r Ridge Regression, eval = FALSE}
@@ -277,7 +283,7 @@ model2_elasticnet
 # install.packages("vip")
 require(vip)
 require(glmnet)
-model1_ridge <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0)
+model1_ridge <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0, nlambda = 100)
 
 par(mar=c(4.5,4.5,1,4))
 plot(model1_ridge)
@@ -288,15 +294,15 @@ axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=
 plot(model1_ridge, xvar = "lambda")
 plot(model1_ridge, xvar = "dev", label = TRUE)
 print(model1_ridge)
-vip(model1_ridge, num_features = 50, geom = "point")
-#https://bradleyboehmke.github.io/HOML/regularized-regression.html
 
-cvmodel1_ridge = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
+cvmodel1_ridge = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV),lambda = 100) 
 cvmodel1_ridge$lambda.min
 log(cvmodel1_ridge$lambda.min)
 coef(cvmodel1_ridge, s = "lambda.min")
+vip(cvmodel1_ridge, num_features = 50, geom = "col")
+#https://bradleyboehmke.github.io/HOML/regularized-regression.html
 
-pred1_ridge <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_ridge$lambda.min)
+pred1_ridge <- predict(model1_ridge, newx = data.matrix(s_dat_test), s = cvmodel1_ridge$lambda.min)
 pred_model1_ridge <- (pred1_ridge < mean(pred1_ridge)) 
 
 table(pred = pred_model1_ridge, true = dat_test$NOTCOV)
@@ -309,6 +315,10 @@ Ridgegoodpred
 model2_ridge <-  glmnet(as.matrix(sobj$data[,-1]),sobj$data$NOTCOV, alpha = 0) 
 model2_ridge
 ```
+Lasso Explanation:
+The results of our lasso regression along with the Variable Important Plot (VIP) function is informing us that the "born-in" variables along with "Region." variables have 
+
+Lasso drives coefficients to zero. The larger the value of lambda the more of the explanatory variables (aka features) are shrunk to zero. This is similar to the Random Forest model that tells us which explanatory variables are of most importance. This process is The explanatory variables that are not shrunk toward zero signify that they are important to 
 
 ```{r Lasso Regression, eval = FALSE}
 # Lasso
@@ -327,15 +337,15 @@ axis(4, at=vnat,line=-.5,label=names(sobj$data[,-1]),las=1,tick=FALSE, cex.axis=
 plot(model1_lasso, xvar = "lambda")
 plot(model1_lasso, xvar = "dev", label = TRUE)
 print(model1_lasso)
-vip(model1_lasso, num_features = 50, geom = "point")
-#https://bradleyboehmke.github.io/HOML/regularized-regression.html
 
 cvmodel1_lasso = cv.glmnet(data.matrix(sobj$data[,-1]),data.matrix(sobj$data$NOTCOV)) 
 cvmodel1_lasso$lambda.min
 log(cvmodel1_lasso$lambda.min)
 coef(cvmodel1_lasso, s = "lambda.min")
+vip(cvmodel1_lasso, num_features = 50, geom = "col")
+#https://bradleyboehmke.github.io/HOML/regularized-regression.html
 
-pred1_lasso <- predict(model1_elasticnet, newx = data.matrix(s_dat_test), s = cvmodel1_lasso$lambda.min)
+pred1_lasso <- predict(model1_lasso, newx = data.matrix(s_dat_test), s = cvmodel1_lasso$lambda.min)
 pred_model1_lasso <- (pred1_lasso < mean(pred1_lasso)) 
 
 table(pred = pred_model1_lasso, true = dat_test$NOTCOV)
