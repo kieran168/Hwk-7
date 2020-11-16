@@ -280,8 +280,6 @@ rate of the OLS and Logit models are 85.38% and 85.35% respectively.
 
     ## Loading required package: randomForest
 
-    ## Warning: package 'randomForest' was built under R version 4.0.3
-
     ## randomForest 4.6-14
 
     ## Type rfNews() to see new features/changes/bug fixes.
@@ -442,43 +440,131 @@ be higher. A person who was predicted to not have coverage can still be
 pitched with other health insurance products if they already have some
 sort of coverage.
 
-### Elastic Net
+### Regularized Regression Models (Elastic Net, Ridge, Lasso)
 
-We have run one model for each if the regularized regression models:
-Elastic Net, Ridge, and Lasso. We ran one for each to be able to see the
-difference between the three and also to see how each would fare in
-their final prediction results.
+We have run one model for each of the regularized regression models:
+Elastic Net, Ridge, and Lasso. We ran one for each to be able to see and
+understand the difference between the three. Lastly, after going through
+the three models individually, we will compare the prediction results at
+the end.
 
-We first run the Elastic Net model which helps us identify which
-variables are of most important to our model
+As we have made sure to standardize our explanatory variables, the
+coefficients are all on a common scale and that means the penalty terms
+we will be applying in these models will equally penalize all predictors
+(e.g. Age will not be penalized more than female = “1”).
 
-In contrast, a more modern approach, called soft thresholding, slowly
-pushes the effects of irrelevant features toward zero, and in some
-cases, will zero out entire coefficients. As will be demonstrated, this
-can result in more accurate models that are also easier to interpret
+Being able to remove explanatory variables from our models that have
+been overloaded with explanatory variables helps make our models more
+interpretable. We want to remove explanatory variables that are not
+contributing to our model because as the number of explanatory variables
+increase, the more likely we will tend to overfit our training data and
+underfit our testing data.
 
-Ridge Regression Explanation: In our ridge regression analysis, we
-haveTherefore Ridge regression decreases the complexity of a model but
-does not reduce the number of variables, it rather just shrinks their
-effect. As ridge regression does not perform feature selection, it is
-best if we re-run a Ridge Regression after removing some of the
-variables we have identified as less important to the model from the
-Lasso Regression and/or Random Forest. However, this means that if WE DO
-have a model where we do not want to drop any of our variables for
-whatever reason, we can do a ridge regression as it will keep all
-avaiable features in the final model.
+#### Elastic Net
 
-Lasso Explanation: The results of our lasso regression along with the
-Variable Important Plot (VIP) function is informing us that the
-“born-in” variables along with “Region.” variables have
+Looking at the plot of our cross-validation ridge regression across all
+the lambda values (*plot(cvmodel1\_elasticnet)*), we see a slight
+improvement in the MSE as our penalty log(lambda) gets larger, which
+suggests that a regular OLS model likely overfits the training data. But
+if we continue to constrain the MSE further (i.e increase the penalty),
+our MSE starts to increase. In this plot we can also see the optimal
+lambda (the log value of the lambda which best minimizes the error in
+cross-validation) is -7.772985, as calculated from the function
+*log(cvmodel1\_elasticnet$lambda.min)*.
 
-Lasso drives coefficients to zero. The larger the value of lambda the
-more of the explanatory variables (aka features) are shrunk to zero.
-This is similar to the Random Forest model that tells us which
-explanatory variables are of most importance. This process is The
-explanatory variables that are not shrunk toward zero signify that they
-are important to
+We chose to set alpha = 0.5 so that there will be an equal combination
+of the Lasso penalty and the Ridge penalty.
 
+Next, we want to identify which variables are most important to our
+model which the elastic net regression can help us with. We run a
+Variable Important Plot (*vip(cvmodel1\_elasticnet, num\_features = 50,
+geom = “col”)*) on the cross-validation model of our elastic net
+regression and see that the advanced degree, bachelor’s degree and being
+married increases our likelihood of having health insurance. Whereas
+variables such as a high school education being born in the South, your
+age, being Hispanic or being born in Mexico/Central America/Carribean
+decrease your likelihood of having health insurance. It is important to
+note that the variables Hispanic and being born in Mexico/Central
+American/Caribbean are probably related and have multicollinearity. For
+this Elastic Net model has some of the ridge penatly incorporated in it
+since the alpha is set to 0.5 so it can be better fit to handle
+multicollinearity if we set the alpha closer to 0.
+
+As elastic net performs feature selection (since it includes the Lasso
+penalty), the next step we would take is to remove the variables who
+have their coefficients pushed to zero from the model including all the
+other “born-from,” region-based and other variables that show as zero in
+the Variable Importance Plot below and re-run the elastic net to see how
+the prediction results improve aka our model becomes more accurate and
+also easier to interpret.
+
+#### Ridge Regression
+
+Looking at the plot of our cross-validation ridge regression across all
+the lambda values (*plot(cvmodel1\_ridge)*), we see a slight improvement
+in the MSE as our penalty log(lambda) gets larger, which suggests that a
+regular OLS model likely overfits the training data. But if we continue
+to constrain the MSE further (i.e increase the penalty), our MSE starts
+to increase. In this plot we can also see the optimal lambda (the log
+value of the lambda which best minimizes the error in cross-validation)
+is -4.62849, as calculated from the function
+*log(cvmodel1\_ridge$lambda.min)*.
+
+As ridge regression does not perform feature selection, that is why you
+see in the Variable Importance Plot below that all variables show some
+degree of shading of importance. Whereas the Lasso and Elastic Net
+regressions will zero out/push to zero the variables that are
+unimportant. As ridge regression performs better when it only has
+variables that are important, we will re-run a Ridge Regression after
+removing some of the variables we have identified as less important
+based on the Lasso and/or Elastic Net Regressions. However, this also
+means that if we DO have a model where we do not want to drop any of our
+variables for whatever reason, we can do a ridge regression as it will
+keep all available features in the final model.
+
+#### Lasso Regression
+
+Looking at the plot of our cross-validation lasso regression across all
+the lambda values (*plot(cvmodel1\_lasso)*), we see a slight improvement
+in the MSE as our penalty log(lambda) gets larger, which suggests that a
+regular OLS model likely overfits the training data. But if we continue
+to constrain the MSE further (i.e increase the penalty), our MSE starts
+to increase. In this plot we can also see the optimal lambda (the log
+value of the lambda which best minimizes the error in cross-validation)
+is -8.187031, as calculated from the function
+*log(cvmodel1\_lasso$lambda.min)*.
+
+And as the lasso regression also performs a automated explanatory
+variable importance selection by using it’s ridge penalty to push
+variables not just approximately to zero, but all the way to zero, we
+can look at the Variable Important Plot to identify which variables are
+less important. The Variable Important Plot function is informing us
+that the “born-in” variables along with the “Region.” variables and some
+other various variables are not important as they have no shading as the
+coefficients of these variables have been pushed to zero by the lasso
+regression. Compared to the elastic net regression we ran above, this
+lasso regression marks the same variables as important as the elastic
+net, but this lasso regression includes a few more: some college
+education and female are (both more likely for health insurance) &
+Race\_Other, born Africa, born South America (all three less likely for
+having health insurance). This makes senses as the Elastic Net includes
+both the ridge penalty and the lasso penalty: getting effective
+regularization from the ridge penalty and also the explanatory variable
+importance selection of the lasso penalty.
+
+#### Results Comparison: Regularization Regression
+
+Overall, the correct prediction percentage between the three models are
+very close, even between the ridge and lasso regressions as that is
+where you expect to see the largest differences which differ by less
+than 0.0003%. The elastic net’s prediction results are right in between
+that of the ridge and lasso. Even tweaking the elastic net alpha from
+0.5 to 0.7 we only see a slight change that brings the correct
+prediction percentage closer to the lasso’s percentage, which makes
+sense since the alpha is getting closer to 1 (a lasso regression).
+
+But all three of these results are significantly less than the \~80%+ we
+are seeing from Random Forest and Support Vector Machines.
 
 ### Other Explanatory Variables
 
@@ -646,6 +732,24 @@ probabilities, tend towards not having health insurance.
     ##    0 0.82892076 0.13512031
     ##    1 0.01622384 0.01973509
 
+#### Elastic Net 2
+
+#### Ridge Regression 2
+
+#### Lasso Regression 2
+
+#### Results Comparison 2: Regularization Regression
+
+So after dropping some of the explanatory variables that were deemed to
+be less important to the model by the Variable Important Plots and
+re-running the three regularization regression models, we see that the
+correct prediction rates actually went down\! This is very surprising as
+we thought that dropping variables marked as not important would improve
+our model and therefore improve the prediction accuracy.
+
+It appears that the majority of the shift was from the True Falses,
+which were at \~53% but are now at \~49%, to the False Positives, which
+were at \~30% and are now at \~35%.
 
 When you summarize, you should be able to explain which models predict
 best (noting if there is a tradeoff of false positive vs false negative)
